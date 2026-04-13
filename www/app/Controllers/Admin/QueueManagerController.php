@@ -23,7 +23,7 @@ class QueueManagerController
             $job->update(['status' => 'pending']);
             
             // Re-push to Redis
-            $redis = RedisManager::client();
+            $redis = RedisManager::getClient();
             $redis->rpush('email_queue', $job->id);
 
             Flash::success("Job #{$job->id} reenfileirado para envio!");

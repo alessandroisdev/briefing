@@ -1,0 +1,21 @@
+#!/usr/bin/env php
+<?php
+
+require __DIR__ . '/vendor/autoload.php';
+
+use Symfony\Component\Console\Application;
+use Dotenv\Dotenv;
+
+// Load Env
+$dotenv = Dotenv::createImmutable(__DIR__);
+$dotenv->safeLoad();
+
+// Boot Database
+require_once __DIR__ . '/app/Core/Database.php';
+
+$application = new Application('NorteDev Console', '1.0.0');
+
+// Register Commands Manually for now (can be dynamic later if needed)
+$application->addCommand(new \App\Console\Commands\QueueWorkCommand());
+
+$application->run();

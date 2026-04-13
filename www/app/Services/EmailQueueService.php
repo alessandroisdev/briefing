@@ -24,7 +24,7 @@ class EmailQueueService
             ]);
 
             // Now, push the Job ID to the Redis List so the worker picks it up immediately
-            $redis = RedisManager::client();
+            $redis = RedisManager::getClient();
             $redis->rpush('email_queue', $job->id);
 
             return true;

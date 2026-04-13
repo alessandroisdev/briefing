@@ -53,9 +53,35 @@
                         </td>
                         <td class="py-3 px-4 text-end">
                             @if($job->status === 'failed')
-                            <form action="/admin/queue/{{ $job->id }}/retry" method="POST" class="d-inline">
-                                <button type="submit" class="btn btn-sm btn-outline-warning"><i class="bi bi-arrow-clockwise"></i> Reenviar</button>
-                            </form>
+                            <div class="d-flex justify-content-end gap-2">
+                                <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#errorModal{{ $job->id }}" title="Ver detalhe do Erro">
+                                    <i class="bi bi-bug"></i> Ver Erro
+                                </button>
+                                <form action="/admin/queue/{{ $job->id }}/retry" method="POST" class="d-inline">
+                                    <button type="submit" class="btn btn-sm btn-outline-warning"><i class="bi bi-arrow-clockwise"></i> Reenviar</button>
+                                </form>
+                            </div>
+
+                            <!-- Modal de Erro -->
+                            <div class="modal fade" id="errorModal{{ $job->id }}" tabindex="-1" aria-hidden="true">
+                                <div class="modal-dialog modal-dialog-centered modal-lg">
+                                    <div class="modal-content bg-dark text-white" style="border: 1px solid #1a253c;">
+                                        <div class="modal-header border-bottom-0">
+                                            <h5 class="modal-title text-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i> Log de Falha - Job #{{ $job->id }}</h5>
+                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <p class="text-muted small mb-2">Destinatário: {{ $job->recipient_email }}</p>
+                                            <div class="p-3 rounded" style="background-color: #09101f; max-height: 300px; overflow-y: auto;">
+                                                <code class="text-danger" style="white-space: pre-wrap; word-break: break-all;">{{ $job->error_message ?: 'Nenhuma mensagem de erro registrada.' }}</code>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer border-top-0">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             @else
                             <button class="btn btn-sm btn-secondary disabled" title="Nenhuma ação disponível"><i class="bi bi-check2"></i></button>
                             @endif
@@ -73,5 +99,4 @@
             </table>
         </div>
     </div>
-</div>
 @endsection

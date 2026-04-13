@@ -172,14 +172,26 @@
                 if(!event.data) return;
                 try {
                     const data = JSON.parse(event.data);
-                    if (data.event === 'status_changed' || data.message) {
+                    if (data.event === 'status_changed' || data.message || data.event === 'queue_updated') {
                         const toastEl = document.getElementById('liveToast');
-                        document.getElementById('toastMessage').innerText = data.message;
-                        const toast = new bootstrap.Toast(toastEl);
-                        toast.show();
+                        
+                        let msg = data.message;
+                        if (data.event === 'queue_updated') {
+                            msg = `O Evento da fila #${data.job_id} mudou para ${data.status}.`;
+                        }
+
+                        if(msg) {
+                            document.getElementById('toastMessage').innerText = msg;
+                            const toast = new bootstrap.Toast(toastEl);
+                            toast.show();
+                        }
                         
                         if(data.briefing_id && window.location.href.includes('briefings/' + data.briefing_id)) {
                             setTimeout(() => { window.location.reload(); }, 3500);
+                        }
+
+                        if(data.event === 'queue_updated' && window.location.href.includes('admin/queue')) {
+                            setTimeout(() => { window.location.reload(); }, 1500);
                         }
                     }
                 } catch(e) {

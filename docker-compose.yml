@@ -21,7 +21,7 @@ services:
     image: briefing-app
     restart: unless-stopped
     working_dir: /var/www/html
-    command: php worker.php
+    command: php nortedev queue:work
     volumes:
       - ./www:/var/www/html
     networks:
