@@ -14,6 +14,23 @@ services:
       - db
       - redis
 
+  worker:
+    build:
+      context: .docker/php
+      dockerfile: Dockerfile
+    image: briefing-app
+    restart: unless-stopped
+    working_dir: /var/www/html
+    command: php worker.php
+    volumes:
+      - ./www:/var/www/html
+    networks:
+      - briefing-network
+    depends_on:
+      - app
+      - db
+      - redis
+
   webserver:
     image: nginx:alpine
     restart: unless-stopped

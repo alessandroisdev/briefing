@@ -11,6 +11,7 @@ $router->get('/', function() {
 $router->mount('/cliente', function() use ($router) {
     $router->get('/login', 'App\Controllers\Client\AuthController@loginForm');
     $router->post('/login', 'App\Controllers\Client\AuthController@login');
+    $router->post('/login/magic-link', 'App\Controllers\Client\AuthController@requestMagicLink');
     
     $router->get('/dashboard', 'App\Controllers\Client\DashboardController@index');
     
@@ -46,4 +47,10 @@ $router->mount('/admin', function() use ($router) {
     $router->post('/briefings/store', 'App\Controllers\Admin\ClientBriefingController@store');
     $router->get('/briefings/(\d+)', 'App\Controllers\Admin\ClientBriefingController@show');
     $router->post('/briefings/(\d+)/status', 'App\Controllers\Admin\ClientBriefingController@updateStatus');
+
+    // Admin Email Settings & Queue
+    $router->get('/settings/email', 'App\Controllers\Admin\EmailSettingsController@index');
+    $router->post('/settings/email', 'App\Controllers\Admin\EmailSettingsController@save');
+    $router->get('/queue', 'App\Controllers\Admin\QueueManagerController@index');
+    $router->post('/queue/(\d+)/retry', 'App\Controllers\Admin\QueueManagerController@retry');
 });

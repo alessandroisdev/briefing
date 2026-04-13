@@ -29,6 +29,13 @@
             <a href="/admin/briefings" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/briefings') === 0 ? 'active' : '' }}">
                 <i class="bi bi-ui-checks"></i> Projetos em Andamento
             </a>
+            <div class="mt-4 mb-2 small text-uppercase text-muted fw-bold px-3">Sistema</div>
+            <a href="/admin/queue" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/queue') === 0 ? 'active' : '' }}">
+                <i class="bi bi-cloud-arrow-up"></i> Fila de E-mails
+            </a>
+            <a href="/admin/settings/email" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/settings/email') === 0 ? 'active' : '' }}">
+                <i class="bi bi-gear"></i> Config. Servidor SMTP
+            </a>
         </nav>
         
         <div class="mt-auto">
