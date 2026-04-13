@@ -14,7 +14,9 @@
         "phpmailer/phpmailer": "^7.0",
         "symfony/console": "^8.0",
         "illuminate/http": "^11.0",
-        "dompdf/dompdf": "^3.1"
+        "dompdf/dompdf": "^3.1",
+        "monolog/monolog": "^3.10",
+        "filp/whoops": "^2.18"
     },
     "autoload": {
         "psr-4": {

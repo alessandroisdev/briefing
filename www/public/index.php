@@ -18,6 +18,9 @@ request();
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');
 $dotenv->safeLoad();
 
+// Configurar captura global de Falhas (Monolog & Whoops baseados no ambiente)
+\App\Core\ErrorHandler::register();
+
 // Initialize Database connection
 require_once __DIR__ . '/../app/Core/Database.php';
 

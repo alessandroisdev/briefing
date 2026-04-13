@@ -125,5 +125,23 @@ class NotificationService
             'type' => $type->value,
             'action_url' => $actionUrl
         ]);
+
+        $user = User::find($userId);
+        if ($user && !empty($user->email)) {
+            $appUrl = env('APP_URL', 'http://localhost:8000');
+            $fullUrl = $actionUrl ? (str_starts_with($actionUrl, 'http') ? $actionUrl : $appUrl . $actionUrl) : $appUrl;
+            
+            $body = "<h3>{$title}</h3>
+                     <p>Olá <b>{$user->name}</b>,</p>
+                     <p>{$message}</p>";
+            
+            if ($actionUrl) {
+                $body .= "<br><div class='button-wrap'>
+                            <a href='{$fullUrl}' class='button'>Acessar o Painel</a>
+                          </div>";
+            }
+                     
+            \App\Services\EmailQueueService::push($user->email, $user->name, $title, $body);
+        }
     }
 }
