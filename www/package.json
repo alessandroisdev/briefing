@@ -1,0 +1,21 @@
+{
+  "name": "briefing-app",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "axios": "^1.6.8",
+    "bootstrap": "^5.3.3",
+    "sass": "^1.75.0",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11"
+  },
+  "dependencies": {
+    "@popperjs/core": "^2.11.8",
+    "quill": "^2.0.2"
+  }
+}

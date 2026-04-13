@@ -1,0 +1,215 @@
+// Google Fonts
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap');
+
+// Elegant Navy Blue & Golden Yellow Theme Variables
+$navy-dark: #09101f;     // Deep background
+$navy-base: #101c38;     // Cards and elements
+$navy-light: #1c305c;    // Hover states and lighter elements
+
+$gold-base: #D4AF37;     // Elegant Gold
+$gold-light: #f3d46a;    // Lighter gold for hover/accents
+$gold-dark: #aa851c;     // Darker gold for borders/text
+
+$primary: $navy-light;
+$secondary: $gold-base;
+$success: #198754;
+$info: #0dcaf0;
+$warning: $gold-base;
+$danger: #dc3545;
+
+// Global Dark Mode Settings
+$body-bg: $navy-dark;
+$body-color: #e2e8f0;
+
+// Typography overrides
+$font-family-base: 'Outfit', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+$headings-color: #ffffff;
+$link-color: $gold-base;
+$link-hover-color: $gold-light;
+
+// Card Settings
+$card-bg: $navy-base;
+$card-border-color: rgba(255, 255, 255, 0.05);
+
+// Input Settings
+$input-bg: $navy-dark;
+$input-color: #e2e8f0;
+$input-border-color: rgba(255,255,255, 0.1);
+$input-focus-bg: $navy-dark;
+$input-focus-border-color: $gold-base;
+$input-focus-box-shadow: 0 0 0 0.25rem rgba(212, 175, 55, 0.25);
+
+// Import Bootstrap
+@import "bootstrap/scss/bootstrap";
+
+// Custom Utilities & Utilities overrides
+html, body {
+  background-color: $navy-dark;
+  color: $body-color;
+  font-family: $font-family-base;
+  -webkit-font-smoothing: antialiased;
+}
+
+// Global Glassmorphism & Card Styles
+.briefing-card {
+  background-color: $navy-base;
+  border-radius: 16px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+// Inputs in Dark Mode
+.form-control {
+  background-color: $navy-dark;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fff;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  
+  &:focus {
+    color: #fff;
+    background-color: #0b1426;
+  }
+}
+
+.form-label {
+  color: #cbd5e1;
+  font-weight: 500;
+  font-size: 0.9rem;
+}
+
+// Custom Buttons
+.btn-primary {
+  background: linear-gradient(135deg, $navy-light, darken($navy-light, 10%));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  border-radius: 8px;
+  font-weight: 500;
+  
+  &:hover {
+    background: linear-gradient(135deg, lighten($navy-light, 5%), $navy-light);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+  }
+}
+
+.btn-secondary, .btn-gold {
+  background: linear-gradient(135deg, $gold-base, $gold-dark);
+  color: $navy-dark;
+  border: none;
+  font-weight: 600;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.2);
+  border-radius: 8px;
+
+  &:hover {
+    background: linear-gradient(135deg, $gold-light, $gold-base);
+    color: $navy-dark;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(212, 175, 55, 0.3);
+  }
+}
+
+.btn-outline-gold {
+    color: $gold-base;
+    border-color: $gold-base;
+    &:hover {
+        background-color: $gold-base;
+        color: $navy-dark;
+    }
+}
+
+// Modern Navbar
+.navbar {
+  background-color: rgba($navy-base, 0.8) !important;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+
+  .navbar-brand {
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #fff !important;
+    
+    span {
+      color: $gold-base;
+    }
+  }
+
+  .nav-link {
+    color: #cbd5e1 !important;
+    font-weight: 500;
+    transition: color 0.2s ease;
+    
+    &:hover {
+      color: $gold-base !important;
+    }
+  }
+}
+
+// Sidebars & Dashboard Layout
+.admin-layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+.sidebar {
+    width: 280px;
+    background-color: $navy-base;
+    border-right: 1px solid rgba(255, 255, 255, 0.05);
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+
+    .sidebar-link {
+        color: #94a3b8;
+        padding: 0.8rem 1rem;
+        border-radius: 8px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        margin-bottom: 0.5rem;
+
+        &:hover, &.active {
+            background-color: rgba($gold-base, 0.1);
+            color: $gold-base;
+        }
+    }
+}
+
+.main-content {
+    flex: 1;
+    padding: 2rem;
+    overflow-y: auto;
+}
+
+// Tables
+.table-dark-custom {
+    color: #cbd5e1;
+    
+    thead th {
+        background-color: rgba(255,255,255,0.02);
+        color: $gold-base;
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        font-weight: 600;
+        padding: 1rem;
+    }
+    
+    tbody td {
+        padding: 1rem;
+        border-color: rgba(255,255,255,0.05);
+        vertical-align: middle;
+        background-color: transparent;
+        color: #e2e8f0;
+    }
+    
+    tbody tr {
+        transition: background-color 0.2s ease;
+        &:hover {
+            background-color: rgba(255,255,255,0.03);
+        }
+    }
+}
