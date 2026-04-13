@@ -31,7 +31,7 @@
     </div>
     <div class="col-md-4">
         <div class="card briefing-card h-100 p-4">
-            <h6 style="color: #94a3b8;">Briefings Ativos (<small>Mock</small>)</h6>
+            <h6 style="color: #94a3b8;">Briefings Ativos</h6>
             <h2 class="display-5 fw-bold text-white mb-0">{{ $metrics['active_briefings'] }}</h2>
         </div>
     </div>

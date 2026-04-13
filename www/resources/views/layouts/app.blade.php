@@ -26,7 +26,7 @@
     
     <nav class="navbar navbar-expand-lg border-bottom border-secondary mb-4 shadow-sm" style="background-color: rgba(16, 28, 56, 0.8) !important; backdrop-filter: blur(10px);">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="#">BriefingApp</a>
+            <a class="navbar-brand fw-bold" href="/cliente/dashboard">BriefingApp</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>

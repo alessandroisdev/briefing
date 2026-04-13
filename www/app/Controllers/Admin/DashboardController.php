@@ -10,10 +10,15 @@ class DashboardController
 {
     public function index()
     {
-        // For now, load some fake metrics just to visualize the layout
+        $activeStatuses = [
+            \App\Enums\BriefingStatus::Criado->value,
+            \App\Enums\BriefingStatus::Editando->value,
+            \App\Enums\BriefingStatus::Executando->value
+        ];
+
         $metrics = [
             'total_clients' => Client::count(),
-            'active_briefings' => 5, // mock
+            'active_briefings' => \App\Models\ClientBriefing::whereIn('status', $activeStatuses)->count(),
             'pending_approvals' => Client::whereNotNull('pending_updates')->count(),
         ];
 

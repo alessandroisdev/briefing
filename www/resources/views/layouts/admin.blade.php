@@ -12,10 +12,10 @@
 <div class="admin-layout mx-n3" style="max-width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); height: 100vh; background-color: #09101f;">
     <!-- Sidebar -->
     <aside class="sidebar">
-        <div class="mb-5 px-3 mt-3">
+        <a href="/admin/dashboard" class="text-decoration-none d-block mb-5 px-3 mt-3">
             <h4 class="fw-bold text-white m-0">Briefing<span style="color: #D4AF37;">App</span></h4>
             <small style="color: #94a3b8;">Admin Panel</small>
-        </div>
+        </a>
         
         <nav class="d-flex flex-column gap-2 mb-auto">
             <a href="/admin/dashboard" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/dashboard') === 0 ? 'active' : '' }}">
@@ -68,7 +68,7 @@
         <!-- Topbar for Admin -->
         <header class="d-flex justify-content-end align-items-center mb-4 px-4 pt-3 w-100">
             <div class="dropdown">
-                <button class="btn btn-link p-0 text-decoration-none position-relative text-dark" type="button" id="notificationDropdown" onclick="toggleBellDropdown(event)" aria-expanded="false" data-bs-display="static" style="font-size:1.3rem; border: none; box-shadow: none;">
+                <button class="btn btn-link p-0 text-decoration-none position-relative text-white" type="button" id="notificationDropdown" onclick="toggleBellDropdown(event)" aria-expanded="false" data-bs-display="static" style="font-size:1.3rem; border: none; box-shadow: none;">
                     <!-- Inline SVG para garantir visualização independente de CDNs e imports de CSS -->
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
                       <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
