@@ -11,16 +11,22 @@ use App\Models\User;
 
 class TicketController
 {
+    public function __construct()
+    {
+        if (!session()->has('client_id')) {
+            response()->redirect('/cliente/login')->send();
+            exit;
+        }
+    }
     public function index()
     {
         $clientId = session()->get('client_id');
-        $clientUser = User::find($clientId);
-        // Client ID in tickets matches the client record, so we find the client logic. Wait, no.
-        // Wait, User is different from Client. The Client model represents the company, it has a user_id.
         $client = \App\Models\Client::where('user_id', $clientId)->first();
 
-        // Se o usuario nao tem Client, nao deveria ter painel? Em auth a gente amarra isso.
-        $tickets = Ticket::where('client_id', $client->id)->orderBy('updated_at', 'desc')->get();
+        $tickets = \Illuminate\Database\Eloquent\Collection::make([]);
+        if ($client) {
+            $tickets = Ticket::where('client_id', $client->id)->orderBy('updated_at', 'desc')->get();
+        }
 
         response(View::render('client.tickets.index', ['tickets' => $tickets]))->send();
     }
@@ -35,6 +41,12 @@ class TicketController
         $userId = session()->get('client_id');
         $client = \App\Models\Client::where('user_id', $userId)->first();
         $user = User::find($userId);
+
+        if (!$client) {
+            \App\Core\Flash::error('Sua conta não possui um perfil de empresa associado para abrir chamados.');
+            response()->redirect('/cliente/suporte');
+            exit;
+        }
 
         $data = request()->all();
         
@@ -116,6 +128,12 @@ class TicketController
         $clientId = session()->get('client_id');
         $client = \App\Models\Client::where('user_id', $clientId)->first();
         
+        if (!$client) {
+            \App\Core\Flash::error('Perfil de cliente ausente.');
+            response()->redirect('/cliente/dashboard');
+            exit;
+        }
+
         $ticket = Ticket::with(['messages.sender', 'messages.attachments'])
                         ->where('id', $id)
                         ->where('client_id', $client->id)
@@ -134,6 +152,12 @@ class TicketController
         $userId = session()->get('client_id');
         $client = \App\Models\Client::where('user_id', $userId)->first();
         $user = User::find($userId);
+
+        if (!$client) {
+            \App\Core\Flash::error('Acesso negado.');
+            response()->redirect('/cliente/suporte');
+            exit;
+        }
 
         $ticket = Ticket::where('id', $id)->where('client_id', $client->id)->first();
         
@@ -215,6 +239,11 @@ class TicketController
     {
         $userId = session()->get('client_id');
         $client = \App\Models\Client::where('user_id', $userId)->first();
+        
+        if (!$client) {
+            response()->setStatusCode(403)->setContent('Acesso negado ou perfil ausente.')->send();
+            exit;
+        }
         
         $attachment = TicketAttachment::with('message.ticket')->find($attachmentId);
         

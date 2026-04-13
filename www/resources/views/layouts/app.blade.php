@@ -31,7 +31,7 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    @if(isset($_SESSION['client_id']))
+                    @if(session()->has('client_id'))
                         <li class="nav-item">
                             <a class="nav-link {{ strpos($_SERVER['REQUEST_URI'], '/cliente/dashboard') === 0 || strpos($_SERVER['REQUEST_URI'], '/cliente/briefings') === 0 ? 'active' : '' }}" href="/cliente/dashboard">Meus Projetos</a>
                         </li>
