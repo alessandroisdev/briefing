@@ -186,6 +186,39 @@
                             toast.show();
                         }
                         
+                        // Manipulação Nativa do Sino de Notificações
+                        if (data.event === 'new_notification') {
+                            const bellSpan = document.getElementById('bellCounters');
+                            const bellText = document.getElementById('bellCounterText');
+                            const noNotifsItem = document.getElementById('noNotifsItem');
+                            const listContainer = document.getElementById('notifListContainer');
+
+                            if (bellSpan && bellText && listContainer) {
+                                bellSpan.style.display = 'inline-block';
+                                let count = parseInt(bellSpan.innerText || "0") + 1;
+                                bellSpan.innerText = count;
+                                bellText.innerText = count + ' novas';
+
+                                if (noNotifsItem) {
+                                    noNotifsItem.remove();
+                                }
+
+                                // Prepend new notification HTML to dropdown
+                                const rawTime = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+                                const newLi = `
+                                <li>
+                                    <a class="dropdown-item py-2 text-wrap bg-dark bg-opacity-50" href="/admin/notifications/${data.notification_id}/read" style="color: #cbd5e1; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                        <div class="d-flex w-100 justify-content-between">
+                                            <small class="text-white fw-bold">${data.title}</small>
+                                            <small style="font-size:0.65rem;" class="text-warning">Agora</small>
+                                        </div>
+                                        <small style="font-size:0.8rem; line-height: 1.1; display: block; margin-top: 4px;">${data.message}</small>
+                                    </a>
+                                </li>`;
+                                listContainer.insertAdjacentHTML('afterbegin', newLi);
+                            }
+                        }
+
                         if(data.briefing_id && window.location.href.includes('briefings/' + data.briefing_id)) {
                             setTimeout(() => { window.location.reload(); }, 3500);
                         }

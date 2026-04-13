@@ -72,6 +72,13 @@ class BriefingController
             'status' => 'editando' // Updates status to indicate client has interacted
         ]);
 
+        \App\Services\NotificationService::sendToAdmins(
+            "Briefing Atualizado",
+            "O cliente <b>{$user->name}</b> atualizou e salvou respostas no projeto '{$briefing->title}'.",
+            "success",
+            "/admin/briefings/{$briefing->id}"
+        );
+
         \App\Core\Flash::success('Suas respostas foram salvas com sucesso!');
 
         header('Location: /cliente/briefings/' . $id);

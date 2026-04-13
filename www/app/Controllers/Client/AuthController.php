@@ -34,6 +34,13 @@ class AuthController
                     $_SESSION['client_id'] = $user->id;
                     $user->update(['magic_link_token' => null]); // invalidate
                     
+                    \App\Services\NotificationService::sendToAdmins(
+                        "Autenticação via Magic Link",
+                        "O cliente <b>{$user->name}</b> efetuou login usando o link de e-mail.",
+                        "info",
+                        "/admin/clients"
+                    );
+                    
                     \App\Core\Flash::success('Autenticação via Código Mágico realizada com sucesso!');
                     header('Location: /cliente/dashboard');
                     exit;
@@ -43,6 +50,14 @@ class AuthController
             // Checking Password Fallback (if they have one)
             if (!empty($code) && !empty($user->password) && password_verify($code, $user->password)) {
                 $_SESSION['client_id'] = $user->id;
+                
+                \App\Services\NotificationService::sendToAdmins(
+                    "Novo Acesso",
+                    "O cliente <b>{$user->name}</b> acabou de entrar no portal.",
+                    "info",
+                    "/admin/clients"
+                );
+                
                 \App\Core\Flash::success('Bem-vindo de volta!');
                 header('Location: /cliente/dashboard');
                 exit;

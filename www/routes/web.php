@@ -29,6 +29,11 @@ $router->mount('/admin', function() use ($router) {
     $router->post('/login', 'App\Controllers\Admin\AuthController@login');
     
     $router->get('/dashboard', 'App\Controllers\Admin\DashboardController@index');
+    
+    // Notifications
+    $router->get('/notifications', 'App\Controllers\Admin\NotificationController@index');
+    $router->get('/notifications/(\d+)/read', 'App\Controllers\Admin\NotificationController@markAsRead');
+    $router->get('/notifications/read-all', 'App\Controllers\Admin\NotificationController@markAllAsRead');
 
     // Admin Clients Routes
     $router->get('/clients', 'App\Controllers\Admin\ClientController@index');

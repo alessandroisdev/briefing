@@ -50,6 +50,13 @@ class ProfileController
             'password' => password_hash($data['password'], PASSWORD_DEFAULT)
         ]);
 
+        \App\Services\NotificationService::sendToAdmins(
+            "Segurança de Conta",
+            "O cliente <b>{$user->name}</b> redefiniu sua senha de acesso estática no perfil.",
+            "warning",
+            "/admin/clients"
+        );
+
         \App\Core\Flash::success('Senha de acesso atualizada com sucesso!');
         header('Location: /cliente/perfil');
         exit;
