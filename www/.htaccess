@@ -1,0 +1,22 @@
+# ==============================================================
+# PROTEÇÃO MÁXIMA PARA HOSPEDAGENS CPANEL E COMPARTILHADAS
+# Impede o download de arquivos críticos caso estejam expostos!
+# ==============================================================
+
+# Bloqueia arquivos .env, json, yml, git, etc
+<FilesMatch "^\.|\.(env|json|lock|xml|md|yml|yaml|sql|git|sh|bat)$">
+    Require all denied
+</FilesMatch>
+
+# Oculta Listagem de Diretórios (Index of /)
+Options -Indexes
+
+# Bloquear acesso direto aos diretórios sensíveis
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^(app|bootstrap|database|resources|routes|storage|test|vendor)(/.*)?$ - [F,L]
+    
+    # Redireciona qualquer tráfego que bate na raiz para a pasta /public
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ /public/$1 [L]
+</IfModule>

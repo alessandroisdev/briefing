@@ -115,12 +115,9 @@ Nosso sistema utiliza `Server-Sent Events (SSE)` plugado debaixo dos panos atrav
 
 A raiz `/public` do projeto possui um `.htaccess` construído para despachar todas as rotas da internet pro arquivo oculto `index.php` do Bramus Router. Ele impede que pessoas acessem suas rotas brutalmente.
 
-**Se usar NGINX puro:** o `.htaccess` é inútil. Adicione na configuração raiz do bloco `/` do seu NGINX a linha de re-escrita forçada:
-```nginx
-location / {
-    try_files $uri $uri/ /index.php?$query_string;
-}
-```
+**Atualização de Segurança Adicionada:** O sistema agora possui um arquivo `.htaccess` mestre diretamente na pasta de nível superior raiz do projeto. Isso significa que, se você por acidente injetar o site inteiro em um `public_html` compartilhado, **o seu `.env`, a pasta `vendor` e o `composer.json` estarão nativamente blindados pelo Apache**. Qualquer tentativa retornará "403 Forbidden", e os usuários comuns serão jogados transparentemente para o diretório `/public`.
+
+**Se usar NGINX puro:** o `.htaccess` é inútil. E nesse caso o NGINX requer declarações absolutas em suas configurações (`try_files` e negar acessos a aquivos `\.`), portanto, jamais exponha uma pasta fora do `public` para o NGINX.
 
 Acesse `https://seusite.com.br/admin/login` e pronto!
 O **BriefingApp + Faturamento** estará operacional 100% na Nuvem.
