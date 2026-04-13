@@ -23,6 +23,30 @@
 
     <!-- Tabela do Cliente -->
     <div class="col-12">
+        
+        <!-- Toolbar de Busca/Filtro -->
+        <div class="card bg-dark border-0 shadow-sm mb-4">
+            <div class="card-body p-3">
+                <div class="row gx-3">
+                    <div class="col-md-8">
+                        <div class="input-group">
+                            <span class="input-group-text bg-transparent border-secondary text-muted"><i class="bi bi-search"></i></span>
+                            <input type="text" id="searchInput" class="form-control bg-transparent text-white border-secondary" placeholder="Buscar por nome do projeto ou status...">
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <select id="statusFilter" class="form-select bg-transparent text-white border-secondary">
+                            <option value="all">Todos os Status</option>
+                            <option value="Aguardando Respostas">Aguardando Respostas</option>
+                            <option value="Em Preenchimento">Em Preenchimento</option>
+                            <option value="Enviado para Análise">Enviado para Análise</option>
+                            <option value="Aprovado">Aprovado</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="card briefing-card border-top border-warning border-4" style="border-top-color: #D4AF37 !important;">
             <div class="table-responsive">
                 <table class="table table-dark-custom mb-0">
@@ -45,10 +69,10 @@
                                 default => ['bg' => 'bg-secondary', 'text' => ucfirst($briefing->status?->value), 'btn' => 'Ver', 'btn_class' => 'btn-outline-light', 'icon' => 'bi-eye'],
                             };
                         @endphp
-                        <tr>
+                        <tr class="briefing-row" data-search-content="{{ strtolower($briefing->title . ' ' . ($briefing->template->name ?? 'Formulário Personalizado')) }}" data-status="{{ $statusInfo['text'] }}">
                             <td>
-                                <strong class="text-white">{{ $briefing->title }}</strong><br>
-                                <small style="color: #94a3b8;">{{ $briefing->template->name ?? 'Formulário Personalizado' }}</small>
+                                <strong class="text-white searchable">{{ $briefing->title }}</strong><br>
+                                <small style="color: #94a3b8;" class="searchable">{{ $briefing->template->name ?? 'Formulário Personalizado' }}</small>
                             </td>
                             <td><span class="badge {{ $statusInfo['bg'] }}">{{ $statusInfo['text'] }}</span></td>
                             <td>{{ date('d/m/Y H:i', strtotime($briefing->updated_at)) }}</td>
@@ -76,4 +100,33 @@
 
 @section('scripts')
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const rows = document.querySelectorAll('.briefing-row');
+
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const statusTerm = statusFilter.value;
+
+            rows.forEach(row => {
+                const textContent = row.getAttribute('data-search-content');
+                const rowStatus = row.getAttribute('data-status');
+                
+                const matchesSearch = textContent.includes(searchTerm);
+                const matchesStatus = (statusTerm === 'all' || rowStatus === statusTerm);
+
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('keyup', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+    });
+</script>
 @endsection
