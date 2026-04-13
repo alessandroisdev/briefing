@@ -211,7 +211,7 @@
                     <form action="/admin/briefings/{{ $briefing->id }}/agreed-value" method="POST" class="d-flex align-items-end gap-3 mt-4" style="max-width: 400px;">
                         <div class="flex-grow-1">
                             <label class="form-label text-gold">Valor Acertado (R$)</label>
-                            <input type="text" name="agreed_value" class="form-control fw-bold bg-dark text-white border-secondary" placeholder="0.00" value="{{ $briefing->agreed_value }}">
+                            <input type="text" id="agreedValueInput" name="agreed_value" class="form-control fw-bold bg-dark text-white border-secondary" placeholder="0,00" value="{{ $briefing->agreed_value ? number_format((float)$briefing->agreed_value, 2, ',', '.') : '' }}">
                         </div>
                         <button type="submit" class="btn btn-success px-4">Salvar</button>
                     </form>
@@ -285,6 +285,24 @@
                 history.replaceState(null, null, hash);
             });
         });
+
+        // Mascara BRL (Dinheiro) no input financeiro
+        const moneyInput = document.getElementById('agreedValueInput');
+        if (moneyInput) {
+            moneyInput.addEventListener('input', function(e) {
+                let value = e.target.value;
+                value = value.replace(/\D/g, ""); // Allow only digits
+                if(value === "") { 
+                    e.target.value = ""; 
+                    return; 
+                }
+                value = (value / 100).toFixed(2) + "";
+                value = value.replace(".", ",");
+                value = value.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
+                value = value.replace(/(\d)(\d{3}),/g, "$1.$2,");
+                e.target.value = value;
+            });
+        }
     });
 </script>
 @endsection

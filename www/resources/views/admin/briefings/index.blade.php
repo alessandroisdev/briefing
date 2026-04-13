@@ -15,6 +15,30 @@
     </div>
 </header>
 
+<!-- Toolbar de Busca/Filtro -->
+<div class="card bg-dark border-0 shadow-sm mb-4">
+    <div class="card-body p-3">
+        <div class="row gx-3">
+            <div class="col-md-9">
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-secondary text-muted"><i class="bi bi-search"></i></span>
+                    <input type="text" id="searchInput" class="form-control bg-transparent text-white border-secondary" placeholder="Buscar por projeto, cliente, template...">
+                </div>
+            </div>
+            <div class="col-md-3">
+                <select id="statusFilter" class="form-select bg-transparent text-white border-secondary">
+                    <option value="all" class="bg-dark text-white">Todos os Status</option>
+                    <option value="CRIADO" class="bg-dark text-white">CRIADO</option>
+                    <option value="EDITANDO" class="bg-dark text-white">EDITANDO</option>
+                    <option value="EXECUTANDO" class="bg-dark text-white">EXECUTANDO</option>
+                    <option value="CANCELADO" class="bg-dark text-white">CANCELADO</option>
+                    <option value="FINALIZADO" class="bg-dark text-white">FINALIZADO</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="card briefing-card">
     <div class="card-body p-0">
         <div class="table-responsive">
@@ -31,7 +55,7 @@
                 </thead>
                 <tbody>
                     @forelse($briefings as $briefing)
-                    <tr>
+                    <tr class="briefing-row" data-search-content="{{ strtolower($briefing->title . ' ' . ($briefing->client->company_name ?? '') . ' ' . ($briefing->client->user->name ?? '') . ' ' . ($briefing->template->title ?? '')) }}" data-status="{{ strtoupper($briefing->status?->value) }}">
                         <td><span class="text-muted">#{{ $briefing->id }}</span></td>
                         <td>
                             <strong class="text-white">{{ $briefing->title }}</strong>
@@ -75,4 +99,36 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById('searchInput');
+        const statusFilter = document.getElementById('statusFilter');
+        const rows = document.querySelectorAll('.briefing-row');
+
+        function filterTable() {
+            const searchTerm = searchInput.value.toLowerCase().trim();
+            const statusTerm = statusFilter.value;
+
+            rows.forEach(row => {
+                const textContent = row.getAttribute('data-search-content');
+                const rowStatus = row.getAttribute('data-status');
+                
+                const matchesSearch = textContent.includes(searchTerm);
+                const matchesStatus = (statusTerm === 'all' || rowStatus === statusTerm);
+
+                if (matchesSearch && matchesStatus) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+
+        searchInput.addEventListener('keyup', filterTable);
+        statusFilter.addEventListener('change', filterTable);
+    });
+</script>
 @endsection

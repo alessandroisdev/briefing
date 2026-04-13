@@ -36,11 +36,11 @@
                     </div>
                     <div class="col-md-4">
                         <select id="statusFilter" class="form-select bg-transparent text-white border-secondary">
-                            <option value="all">Todos os Status</option>
-                            <option value="Aguardando Respostas">Aguardando Respostas</option>
-                            <option value="Em Preenchimento">Em Preenchimento</option>
-                            <option value="Enviado para Análise">Enviado para Análise</option>
-                            <option value="Aprovado">Aprovado</option>
+                            <option value="all" class="bg-dark text-white">Todos os Status</option>
+                            <option value="Aguardando Respostas" class="bg-dark text-white">Aguardando Respostas</option>
+                            <option value="Em Preenchimento" class="bg-dark text-white">Em Preenchimento</option>
+                            <option value="Enviado para Análise" class="bg-dark text-white">Enviado para Análise</option>
+                            <option value="Aprovado" class="bg-dark text-white">Aprovado</option>
                         </select>
                     </div>
                 </div>

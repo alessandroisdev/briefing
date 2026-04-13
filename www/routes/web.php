@@ -60,6 +60,13 @@ $router->mount('/admin', function() use ($router) {
     $router->get('/templates/(\d+)/edit', 'App\Controllers\Admin\BriefingTemplateController@edit');
     $router->post('/templates/(\d+)/update', 'App\Controllers\Admin\BriefingTemplateController@update');
 
+    // Admin Canned Responses (Message Templates) Routes
+    $router->get('/templates/messages', 'App\Controllers\Admin\MessageTemplateController@index');
+    $router->get('/templates/messages/create', 'App\Controllers\Admin\MessageTemplateController@create');
+    $router->post('/templates/messages/store', 'App\Controllers\Admin\MessageTemplateController@store');
+    $router->get('/templates/messages/(\d+)/edit', 'App\Controllers\Admin\MessageTemplateController@edit');
+    $router->post('/templates/messages/(\d+)/update', 'App\Controllers\Admin\MessageTemplateController@update');
+
     // Admin Client Briefings Routes (Projects)
     $router->get('/briefings', 'App\Controllers\Admin\ClientBriefingController@index');
     $router->get('/briefings/create', 'App\Controllers\Admin\ClientBriefingController@create');
@@ -69,6 +76,12 @@ $router->mount('/admin', function() use ($router) {
     $router->post('/briefings/(\d+)/message', 'App\Controllers\Admin\ClientBriefingController@storeMessage');
     $router->post('/briefings/(\d+)/credential', 'App\Controllers\Admin\ClientBriefingController@storeCredential');
     $router->post('/briefings/(\d+)/agreed-value', 'App\Controllers\Admin\ClientBriefingController@updateAgreedValue');
+
+    // Admin Quotations (Orçamentos Comerciais)
+    $router->get('/quotations/create', 'App\Controllers\Admin\QuotationController@create');
+    $router->post('/quotations/store', 'App\Controllers\Admin\QuotationController@store');
+    $router->get('/quotations/(\d+)', 'App\Controllers\Admin\QuotationController@show');
+    $router->get('/quotations/(\d+)/pdf', 'App\Controllers\Admin\QuotationController@generatePdf');
 
     // Admin Tickets (Support)
     $router->get('/tickets', 'App\Controllers\Admin\TicketController@index');
