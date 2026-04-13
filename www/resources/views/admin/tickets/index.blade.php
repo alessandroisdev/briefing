@@ -1,6 +1,6 @@
 @extends('layouts.admin')
 
-@section('content')
+@section('admin_content')
 <header class="d-flex justify-content-between align-items-center mb-5">
     <div>
         <h2 class="fw-bold text-white mb-0">Help Desk Tickets</h2>

@@ -129,4 +129,41 @@ class TicketController
 
         response()->redirect('/admin/tickets');
     }
+
+    public function attachment($attachmentId)
+    {
+        // Admin validation
+        $adminId = session()->get('user_id');
+        $adminUser = User::find($adminId);
+        
+        if (!$adminUser || $adminUser->role?->value !== \App\Enums\UserRole::Admin->value) {
+            response()->setStatusCode(403)->setContent('Acesso negado.')->send();
+            exit;
+        }
+
+        $attachment = TicketAttachment::find($attachmentId);
+        
+        if (!$attachment) {
+            response()->setStatusCode(404)->setContent('Anexo não encontrado.')->send();
+            exit;
+        }
+
+        $filePath = $attachment->file_path;
+        
+        if (!file_exists($filePath)) {
+            response()->setStatusCode(404)->setContent('Arquivo físico não encontrado no servidor.')->send();
+            exit;
+        }
+
+        $mimeType = mime_content_type($filePath);
+        $fileName = $attachment->file_name;
+
+        header('Content-Type: ' . $mimeType);
+        header('Content-Disposition: inline; filename="' . basename($fileName) . '"');
+        header('Content-Length: ' . filesize($filePath));
+        header('Cache-Control: public, max-age=86400');
+        
+        readfile($filePath);
+        exit;
+    }
 }

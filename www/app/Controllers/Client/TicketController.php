@@ -210,4 +210,35 @@ class TicketController
         \App\Core\Flash::success('Mensagem enviada com sucesso!');
         response()->redirect("/cliente/suporte/{$ticket->id}");
     }
+
+    public function attachment($attachmentId)
+    {
+        $userId = session()->get('client_id');
+        $client = \App\Models\Client::where('user_id', $userId)->first();
+        
+        $attachment = TicketAttachment::with('message.ticket')->find($attachmentId);
+        
+        if (!$attachment || $attachment->message->ticket->client_id !== $client->id) {
+            response()->setStatusCode(403)->setContent('Acesso negado ou anexo não encontrado.')->send();
+            exit;
+        }
+
+        $filePath = $attachment->file_path;
+        
+        if (!file_exists($filePath)) {
+            response()->setStatusCode(404)->setContent('Arquivo físico não encontrado no servidor.')->send();
+            exit;
+        }
+
+        $mimeType = mime_content_type($filePath);
+        $fileName = $attachment->file_name;
+
+        header('Content-Type: ' . $mimeType);
+        header('Content-Disposition: inline; filename="' . basename($fileName) . '"');
+        header('Content-Length: ' . filesize($filePath));
+        header('Cache-Control: public, max-age=86400');
+        
+        readfile($filePath);
+        exit;
+    }
 }

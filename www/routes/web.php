@@ -29,6 +29,7 @@ $router->mount('/cliente', function() use ($router) {
     $router->post('/suporte/store', 'App\Controllers\Client\TicketController@store');
     $router->get('/suporte/(\d+)', 'App\Controllers\Client\TicketController@show');
     $router->post('/suporte/(\d+)/reply', 'App\Controllers\Client\TicketController@reply');
+    $router->get('/suporte/anexo/(\d+)', 'App\Controllers\Client\TicketController@attachment');
 });
 
 $router->mount('/admin', function() use ($router) {
@@ -69,6 +70,7 @@ $router->mount('/admin', function() use ($router) {
     $router->get('/tickets/(\d+)', 'App\Controllers\Admin\TicketController@show');
     $router->post('/tickets/(\d+)/reply', 'App\Controllers\Admin\TicketController@reply');
     $router->post('/tickets/(\d+)/status', 'App\Controllers\Admin\TicketController@updateStatus');
+    $router->get('/tickets/anexo/(\d+)', 'App\Controllers\Admin\TicketController@attachment');
 
     // Admin Email Settings & Queue
 

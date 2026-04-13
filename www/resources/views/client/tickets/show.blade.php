@@ -51,11 +51,16 @@
                                     @if(count($msg->attachments) > 0)
                                     <div class="attachments mt-2 d-flex flex-wrap gap-2">
                                         @foreach($msg->attachments as $att)
-                                            <div class="bg-dark border border-secondary px-3 py-2 rounded-2 d-flex align-items-center">
-                                                <i class="bi bi-paperclip text-muted me-2"></i>
-                                                <span class="text-white small me-3">{{ $att->file_name }}</span>
-                                            </div>
-                                        @endforeach
+                                        @php
+                                            $attUrl = "/cliente/suporte/anexo/" . $att->id;
+                                            $ext = strtolower(pathinfo($att->file_name, PATHINFO_EXTENSION));
+                                            $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                        @endphp
+                                        <a href="javascript:void(0)" onclick="openAttachmentModal('{{ $attUrl }}', {{ $isImage ? 'true' : 'false' }}, '{{ htmlspecialchars($att->file_name, ENT_QUOTES) }}')" class="text-decoration-none bg-dark border border-secondary px-3 py-2 rounded-2 d-flex align-items-center" style="transition:all 0.2s;">
+                                            <i class="bi {{ $isImage ? 'bi-image' : 'bi-paperclip' }} text-gold me-2"></i>
+                                            <span class="text-white small fw-semibold">{{ $att->file_name }}</span>
+                                        </a>
+                                    @endforeach
                                     </div>
                                     @endif
                                 </div>
@@ -102,7 +107,49 @@
     </div>
 </div>
 
+<!-- Attachment Modal -->
+<div class="modal fade" id="attachmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title text-white" id="attachmentModalLabel"></h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body text-center p-0 bg-black" style="min-height: 250px; display:flex; align-items:center; justify-content:center;">
+                <img id="attachmentImage" src="" style="max-width: 100%; max-height: 70vh; display: none; object-fit: contain;">
+                <div id="attachmentGeneric" class="p-5 w-100" style="display:none;">
+                    <i class="bi bi-file-earmark-arrow-down fs-1 text-muted mb-3 d-block"></i>
+                    <h5 class="text-white mb-2">Este arquivo não é uma imagem nativa</h5>
+                    <p class="text-muted small mb-4">Clique no botão abaixo para baixar ou abrir o documento de mídia seguramente.</p>
+                    <a id="attachmentDownloadBtn" href="" target="_blank" class="btn btn-gold px-4 fw-bold text-dark">Abrir / Baixar Arquivo</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
+    function openAttachmentModal(url, isImage, filename) {
+        document.getElementById('attachmentModalLabel').innerText = filename;
+        const img = document.getElementById('attachmentImage');
+        const generic = document.getElementById('attachmentGeneric');
+        const downloadBtn = document.getElementById('attachmentDownloadBtn');
+
+        if (isImage) {
+            img.src = url;
+            img.style.display = 'block';
+            generic.style.display = 'none';
+        } else {
+            img.style.display = 'none';
+            generic.style.display = 'block';
+            downloadBtn.href = url;
+        }
+
+        if(window.bootstrap) {
+            const modal = new bootstrap.Modal(document.getElementById('attachmentModal'));
+            modal.show();
+        }
+    }
     function updateFileLabel() {
         const input = document.getElementById('fileUpload');
         const label = document.getElementById('fileLabel');
