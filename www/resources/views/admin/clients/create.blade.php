@@ -37,15 +37,18 @@
                         <input type="email" name="email" class="form-control" required>
                     </div>
                     <div class="col-md-6 mb-3">
+                        <label class="form-label" style="color: #94a3b8;">Documento (CPF/CNPJ) <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="document" placeholder="Apenas números" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" style="color: #94a3b8;">Senha de Acesso Opcional</label>
+                        <input type="password" class="form-control" name="password" minlength="4" placeholder="Deixe em branco para forçar Magic Link">
+                    </div>
+                    <div class="col-md-6 mb-3">
                         <label class="form-label ps-1">Telefone / WhatsApp</label>
                         <input type="text" name="phone" class="form-control">
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label class="form-label ps-1">CPF ou CNPJ</label>
-                        <input type="text" name="document" class="form-control">
-                    </div>
                 </div>
-
                 <div class="mt-5 d-flex justify-content-end gap-3">
                     <a href="/admin/clients" class="btn btn-outline-light">Cancelar</a>
                     <button type="submit" class="btn btn-gold px-5 fw-semibold">Cadastrar Cliente</button>

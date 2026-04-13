@@ -37,6 +37,11 @@ class ClientController
         $user->phone = $data['phone'] ?? null;
         $user->document = $data['document'] ?? null;
         $user->role = 'client';
+        
+        if (!empty($data['password'])) {
+            $user->password = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
+        
         $user->save();
 
         // Create Client specific data
@@ -74,11 +79,17 @@ class ClientController
             
             // Only update user if relation exists
             if ($client->user) {
-                $client->user->update([
+                $userData = [
                     'name' => $data['name'],
                     'phone' => $data['phone'] ?? null,
                     'document' => $data['document'] ?? null,
-                ]);
+                ];
+                
+                if (!empty($data['password'])) {
+                    $userData['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+                }
+                
+                $client->user->update($userData);
             }
 
             $client->update([

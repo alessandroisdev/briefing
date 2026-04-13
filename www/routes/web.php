@@ -15,6 +15,10 @@ $router->mount('/cliente', function() use ($router) {
     
     $router->get('/dashboard', 'App\Controllers\Client\DashboardController@index');
     
+    // Configurações do Perfil e Senha
+    $router->get('/perfil', 'App\Controllers\Client\ProfileController@index');
+    $router->post('/perfil/senha', 'App\Controllers\Client\ProfileController@updatePassword');
+    
     // Client Briefings
     $router->get('/briefings/(\d+)', 'App\Controllers\Client\BriefingController@show');
     $router->post('/briefings/(\d+)/save', 'App\Controllers\Client\BriefingController@save');

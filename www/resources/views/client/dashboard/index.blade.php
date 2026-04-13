@@ -7,7 +7,7 @@
         <a class="nav-link active" href="/cliente/dashboard">Meus Projetos</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="#"><i class="bi bi-person-circle"></i> Perfil</a>
+        <a class="nav-link" href="/cliente/perfil"><i class="bi bi-person-circle"></i> Perfil</a>
     </li>
     <li class="nav-item ms-3">
         <a class="btn btn-outline-danger btn-sm mt-1" href="/">Sair</a>
@@ -35,29 +35,37 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Mock data for Phase 3 -->
+                        @forelse($briefings as $briefing)
+                        @php
+                            $statusInfo = match($briefing->status) {
+                                'pending' => ['bg' => 'bg-warning text-dark', 'text' => 'Aguardando Respostas', 'btn' => 'Preencher', 'btn_class' => 'btn-gold', 'icon' => 'bi-pencil-square'],
+                                'in_progress' => ['bg' => 'bg-info text-dark', 'text' => 'Em Preenchimento', 'btn' => 'Continuar', 'btn_class' => 'btn-outline-info', 'icon' => 'bi-pencil'],
+                                'submitted' => ['bg' => 'bg-success', 'text' => 'Enviado para Análise', 'btn' => 'Visualizar', 'btn_class' => 'btn-outline-light', 'icon' => 'bi-eye'],
+                                'approved' => ['bg' => 'bg-primary', 'text' => 'Aprovado', 'btn' => 'Acessar', 'btn_class' => 'btn-outline-light', 'icon' => 'bi-check2-circle'],
+                                default => ['bg' => 'bg-secondary', 'text' => ucfirst($briefing->status), 'btn' => 'Ver', 'btn_class' => 'btn-outline-light', 'icon' => 'bi-eye'],
+                            };
+                        @endphp
                         <tr>
                             <td>
-                                <strong class="text-white">Briefing de Identidade Visual</strong><br>
-                                <small style="color: #94a3b8;">Criação de Logo e Manual da Marca</small>
+                                <strong class="text-white">{{ $briefing->title }}</strong><br>
+                                <small style="color: #94a3b8;">{{ $briefing->template->name ?? 'Formulário Personalizado' }}</small>
                             </td>
-                            <td><span class="badge bg-warning text-dark">Aguardando Respostas</span></td>
-                            <td>Hoje às 10:45</td>
+                            <td><span class="badge {{ $statusInfo['bg'] }}">{{ $statusInfo['text'] }}</span></td>
+                            <td>{{ date('d/m/Y H:i', strtotime($briefing->updated_at)) }}</td>
                             <td class="text-end">
-                                <button class="btn btn-sm btn-gold"><i class="bi bi-pencil-square"></i> Preencher</button>
+                                <a href="/cliente/briefings/{{ $briefing->id }}" class="btn btn-sm {{ $statusInfo['btn_class'] }}">
+                                    <i class="bi {{ $statusInfo['icon'] }}"></i> {{ $statusInfo['btn'] }}
+                                </a>
                             </td>
                         </tr>
+                        @empty
                         <tr>
-                            <td>
-                                <strong class="text-white">Website Institucional</strong><br>
-                                <small style="color: #94a3b8;">Protótipo Figma</small>
-                            </td>
-                            <td><span class="badge bg-success">Executando</span></td>
-                            <td>Ontem</td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-outline-light"><i class="bi bi-eye"></i> Visualizar</button>
+                            <td colspan="4" class="text-center py-5 text-secondary">
+                                <i class="bi bi-folder-x fs-1"></i><br>
+                                Nenhum projeto de briefing disponível no momento.
                             </td>
                         </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

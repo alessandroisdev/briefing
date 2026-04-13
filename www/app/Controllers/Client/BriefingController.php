@@ -9,9 +9,19 @@ class BriefingController
 {
     public function show($id)
     {
-        // Ideally we should verify if this briefing belongs to the currently authenticated client
-        // For Phase 4, we assume access is granted by ID for the mockup or using simple logic
-        $briefing = ClientBriefing::with(['template', 'client.user'])->find($id);
+        if (empty($_SESSION['client_id'])) {
+            header('Location: /cliente/login');
+            exit;
+        }
+
+        $user = \App\Models\User::find($_SESSION['client_id']);
+        $client = \App\Models\Client::where('user_id', $user->id)->first();
+
+        // Ensure client only accesses their own briefings
+        $briefing = ClientBriefing::with(['template', 'client.user'])
+                        ->where('id', $id)
+                        ->where('client_id', $client->id ?? 0)
+                        ->first();
 
         if (!$briefing) {
             header('Location: /cliente/dashboard');
@@ -23,7 +33,18 @@ class BriefingController
 
     public function save($id)
     {
-        $briefing = ClientBriefing::find($id);
+        if (empty($_SESSION['client_id'])) {
+            header('Location: /cliente/login');
+            exit;
+        }
+
+        $user = \App\Models\User::find($_SESSION['client_id']);
+        $client = \App\Models\Client::where('user_id', $user->id)->first();
+
+        // Ensure client only accesses their own briefings
+        $briefing = ClientBriefing::where('id', $id)
+                        ->where('client_id', $client->id ?? 0)
+                        ->first();
 
         if (!$briefing) {
             header('Location: /cliente/dashboard');

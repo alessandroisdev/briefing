@@ -70,8 +70,12 @@
                         <input type="text" name="phone" class="form-control" value="{{ $client->user->phone ?? '' }}">
                     </div>
                     <div class="col-md-6 mb-3">
-                        <label class="form-label ps-1">CPF ou CNPJ</label>
-                        <input type="text" name="document" class="form-control" value="{{ $client->user->document ?? '' }}">
+                        <label class="form-label" style="color: #94a3b8;">Documento (CPF/CNPJ) <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control" name="document" value="{{ $client->user->document ?? '' }}" required>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label" style="color: #94a3b8;">Redefinir Senha de Acesso</label>
+                        <input type="password" class="form-control" name="password" minlength="4" placeholder="Opcional. Preencha apenas se desejar trocar">
                     </div>
                 </div>
 
