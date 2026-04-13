@@ -18,7 +18,7 @@ class BriefingController
             exit;
         }
 
-        return View::render('client.briefings.show', ['briefing' => $briefing]);
+        echo View::render('client.briefings.show', ['briefing' => $briefing]);
     }
 
     public function save($id)

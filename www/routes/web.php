@@ -2,6 +2,8 @@
 
 /** @var \Bramus\Router\Router $router */
 
+$router->get('/sse/stream', 'App\Controllers\SSEController@stream');
+
 $router->get('/', function() {
     echo \App\Core\View::render('welcome');
 });

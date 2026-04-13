@@ -12,14 +12,14 @@ class ClientBriefingController
     public function index()
     {
         $briefings = ClientBriefing::with(['client.user', 'template'])->orderBy('id', 'desc')->get();
-        return View::render('admin.briefings.index', ['briefings' => $briefings]);
+        echo View::render('admin.briefings.index', ['briefings' => $briefings]);
     }
 
     public function create()
     {
         $clients = Client::with('user')->get();
         $templates = BriefingTemplate::where('status', 'active')->get();
-        return View::render('admin.briefings.create', ['clients' => $clients, 'templates' => $templates]);
+        echo View::render('admin.briefings.create', ['clients' => $clients, 'templates' => $templates]);
     }
 
     public function store()
@@ -53,7 +53,7 @@ class ClientBriefingController
             exit;
         }
 
-        return View::render('admin.briefings.show', ['briefing' => $briefing]);
+        echo View::render('admin.briefings.show', ['briefing' => $briefing]);
     }
 
     public function updateStatus($id)
@@ -62,7 +62,18 @@ class ClientBriefingController
         $briefing = ClientBriefing::find($id);
 
         if ($briefing && isset($data['status'])) {
+            $oldStatus = $briefing->status;
             $briefing->update(['status' => $data['status']]);
+
+            if ($oldStatus !== $data['status']) {
+                // Notificar frontend via Redis e SSE
+                \App\Core\RedisManager::publish('notifications_channel', [
+                    'event' => 'status_changed',
+                    'briefing_id' => $briefing->id,
+                    'new_status' => $data['status'],
+                    'message' => "O status do projeto #{$briefing->id} foi alterado para: " . strtoupper($data['status'])
+                ]);
+            }
         }
 
         header('Location: /admin/briefings/' . $id);

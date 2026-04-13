@@ -10,12 +10,12 @@ class BriefingTemplateController
     public function index()
     {
         $templates = BriefingTemplate::orderBy('id', 'desc')->get();
-        return View::render('admin.templates.index', ['templates' => $templates]);
+        echo View::render('admin.templates.index', ['templates' => $templates]);
     }
 
     public function create()
     {
-        return View::render('admin.templates.create');
+        echo View::render('admin.templates.create');
     }
 
     public function store()
@@ -47,7 +47,7 @@ class BriefingTemplateController
             exit;
         }
 
-        return View::render('admin.templates.edit', ['template' => $template]);
+        echo View::render('admin.templates.edit', ['template' => $template]);
     }
 
     public function update($id)

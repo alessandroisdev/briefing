@@ -9,7 +9,7 @@ class AuthController
 {
     public function loginForm()
     {
-        return View::render('client.auth.login');
+        echo View::render('client.auth.login');
     }
 
     public function login()

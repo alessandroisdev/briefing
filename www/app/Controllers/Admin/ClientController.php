@@ -11,12 +11,12 @@ class ClientController
     public function index()
     {
         $clients = Client::with('user')->orderBy('id', 'desc')->get();
-        return View::render('admin.clients.index', ['clients' => $clients]);
+        echo View::render('admin.clients.index', ['clients' => $clients]);
     }
 
     public function create()
     {
-        return View::render('admin.clients.create');
+        echo View::render('admin.clients.create');
     }
 
     public function store()
@@ -60,7 +60,7 @@ class ClientController
             exit;
         }
 
-        return View::render('admin.clients.edit', ['client' => $client]);
+        echo View::render('admin.clients.edit', ['client' => $client]);
     }
 
     public function update($id)

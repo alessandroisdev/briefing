@@ -8,7 +8,7 @@ class AuthController
 {
     public function loginForm()
     {
-        return View::render('admin.auth.login');
+        echo View::render('admin.auth.login');
     }
 
     public function login()
