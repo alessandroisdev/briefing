@@ -19,9 +19,9 @@ class DashboardController
 
         $clients = Client::with('user')->get();
 
-        echo View::render('admin.dashboard.index', [
+        response(View::render('admin.dashboard.index', [
             'metrics' => $metrics,
             'clients' => $clients
-        ]);
+        ]))->send();
     }
 }

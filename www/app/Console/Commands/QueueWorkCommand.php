@@ -29,7 +29,7 @@ class QueueWorkCommand extends Command
 
         // [CRASH RECOVERY] Re-enfileirar jobs 'pending' órfãos no banco (que o worker puxou do redis mas crashou antes de finalizar)
         $output->writeln('<comment>Limpando e sincronizando banco de dados...</comment>');
-        $lostJobs = EmailJob::where('status', 'pending')->get();
+        $lostJobs = EmailJob::where('status', \App\Enums\EmailJobStatus::Pending->value)->get();
         if(!empty($lostJobs)) {
             // Remove queue anterior para não duplicar, e recria alinhada ao Banco de origem
             $redis->del('email_queue');
@@ -104,11 +104,22 @@ class QueueWorkCommand extends Command
                     $mail->Subject = $job->subject;
                     $mail->Body    = $job->body;
 
+                    if (!empty($job->attachments)) {
+                        $attachments = is_array($job->attachments) ? $job->attachments : json_decode($job->attachments, true);
+                        if (is_array($attachments)) {
+                            foreach ($attachments as $attachment) {
+                                if (file_exists($attachment)) {
+                                    $mail->addAttachment($attachment);
+                                }
+                            }
+                        }
+                    }
+
                     $mail->send();
                     
                     // Success
                     $job->update([
-                        'status' => 'sent',
+                        'status' => \App\Enums\EmailJobStatus::Sent,
                         'sent_at' => date('Y-m-d H:i:s'),
                         'attempts' => $job->attempts + 1
                     ]);
@@ -116,7 +127,7 @@ class QueueWorkCommand extends Command
                     RedisManager::publish('notifications_channel', [
                         'event' => 'queue_updated',
                         'job_id' => $jobId,
-                        'status' => 'sent'
+                        'status' => \App\Enums\EmailJobStatus::Sent
                     ]);
 
                     $output->writeln("<info>Successfully sent Job #{$jobId}</info>\n");
@@ -124,7 +135,7 @@ class QueueWorkCommand extends Command
                 } catch (Exception $e) {
                     $output->writeln("<error>Failed to send Job #{$jobId}. Error: {$mail->ErrorInfo}</error>\n");
                     $job->update([
-                        'status' => 'failed',
+                        'status' => \App\Enums\EmailJobStatus::Failed,
                         'error_message' => $mail->ErrorInfo,
                         'attempts' => $job->attempts + 1
                     ]);
@@ -132,7 +143,7 @@ class QueueWorkCommand extends Command
                     RedisManager::publish('notifications_channel', [
                         'event' => 'queue_updated',
                         'job_id' => $jobId,
-                        'status' => 'failed'
+                        'status' => \App\Enums\EmailJobStatus::Failed
                     ]);
                 }
 

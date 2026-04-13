@@ -12,38 +12,36 @@ class ClientBriefingController
     public function index()
     {
         $briefings = ClientBriefing::with(['client.user', 'template'])->orderBy('id', 'desc')->get();
-        echo View::render('admin.briefings.index', ['briefings' => $briefings]);
+        response(View::render('admin.briefings.index', ['briefings' => $briefings]))->send();
     }
 
     public function create()
     {
         $clients = Client::with('user')->get();
-        $templates = BriefingTemplate::where('status', 'active')->get();
-        echo View::render('admin.briefings.create', ['clients' => $clients, 'templates' => $templates]);
+        $templates = BriefingTemplate::where('status', \App\Enums\ActiveStatus::Active->value)->get();
+        response(View::render('admin.briefings.create', ['clients' => $clients, 'templates' => $templates]))->send();
     }
 
     public function store()
     {
-        $data = $_POST;
+        $data = request()->all();
         
         $template = BriefingTemplate::find($data['template_id']);
         if (!$template) {
             \App\Core\Flash::error('O modelo de briefing selecionado não foi encontrado!');
-            header('Location: /admin/briefings/create');
-            exit;
+            response()->redirect('/admin/briefings/create');
         }
 
         ClientBriefing::create([
             'client_id' => $data['client_id'],
             'template_id' => $template->id,
             'title' => $data['title'] ?: $template->title,
-            'status' => 'criado', // enum: criado, editando, executando, cancelado, finalizado
+            'status' => \App\Enums\BriefingStatus::Criado, // enum: criado, editando, executando, cancelado, finalizado
             // form_data will be populated by the client
         ]);
 
         \App\Core\Flash::success('Projeto/Briefing associado ao cliente com sucesso!');
-        header('Location: /admin/briefings');
-        exit;
+        response()->redirect('/admin/briefings');
     }
 
     public function show($id)
@@ -52,16 +50,15 @@ class ClientBriefingController
 
         if (!$briefing) {
             \App\Core\Flash::error('Projeto não encontrado!');
-            header('Location: /admin/briefings');
-            exit;
+            response()->redirect('/admin/briefings');
         }
 
-        echo View::render('admin.briefings.show', ['briefing' => $briefing]);
+        response(View::render('admin.briefings.show', ['briefing' => $briefing]))->send();
     }
 
     public function updateStatus($id)
     {
-        $data = $_POST;
+        $data = request()->all();
         $briefing = ClientBriefing::find($id);
 
         if ($briefing && isset($data['status'])) {
@@ -80,7 +77,6 @@ class ClientBriefingController
             \App\Core\Flash::success('Status atualizado com sucesso!');
         }
 
-        header('Location: /admin/briefings/' . $id);
-        exit;
+        response()->redirect('/admin/briefings/' . $id);
     }
 }

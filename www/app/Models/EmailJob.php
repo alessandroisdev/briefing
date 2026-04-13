@@ -18,4 +18,8 @@ class EmailJob extends Model
         'attempts',
         'sent_at'
     ];
+
+    protected $casts = [
+        'status' => \App\Enums\EmailJobStatus::class,
+    ];
 }

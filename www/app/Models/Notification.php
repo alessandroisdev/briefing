@@ -18,6 +18,7 @@ class Notification extends Model
     ];
 
     protected $casts = [
+        'type' => \App\Enums\AlertType::class,
         'read_at' => 'datetime',
     ];
 

@@ -9,16 +9,15 @@ class AuthController
 {
     public function loginForm()
     {
-        echo View::render('client.auth.login');
+        response(View::render('client.auth.login'))->send();
     }
 
     public function login()
     {
-        $data = $_POST;
-        $identification = $data['identification'] ?? '';
-        $code = $data['code'] ?? '';
+        $identification = request()->input('identification', '');
+        $code = request()->input('code', '');
         
-        $user = User::where('role', 'client')
+        $user = User::where('role', \App\Enums\UserRole::Client->value)
                     ->where(function($q) use ($identification) {
                         $q->where('email', $identification)
                           ->orWhere('phone', $identification)
@@ -31,55 +30,51 @@ class AuthController
             if (!empty($code) && $user->magic_link_token === $code) {
                 if (strtotime($user->magic_link_expires) > time()) {
                     // Valid!
-                    $_SESSION['client_id'] = $user->id;
+                    session()->put('client_id', $user->id);
                     $user->update(['magic_link_token' => null]); // invalidate
                     
                     \App\Services\NotificationService::sendToAdmins(
                         "Autenticação via Magic Link",
                         "O cliente <b>{$user->name}</b> efetuou login usando o link de e-mail.",
-                        "info",
+                        \App\Enums\AlertType::Info,
                         "/admin/clients"
                     );
                     
                     \App\Core\Flash::success('Autenticação via Código Mágico realizada com sucesso!');
-                    header('Location: /cliente/dashboard');
-                    exit;
+                    response()->redirect('/cliente/dashboard');
                 }
             }
             
             // Checking Password Fallback (if they have one)
             if (!empty($code) && !empty($user->password) && password_verify($code, $user->password)) {
-                $_SESSION['client_id'] = $user->id;
+                session()->put('client_id', $user->id);
                 
                 \App\Services\NotificationService::sendToAdmins(
                     "Novo Acesso",
                     "O cliente <b>{$user->name}</b> acabou de entrar no portal.",
-                    "info",
+                    \App\Enums\AlertType::Info,
                     "/admin/clients"
                 );
                 
                 \App\Core\Flash::success('Bem-vindo de volta!');
-                header('Location: /cliente/dashboard');
-                exit;
+                response()->redirect('/cliente/dashboard');
             }
         }
 
         \App\Core\Flash::error('Credenciais inválidas ou código preterido expirado!');
-        header('Location: /cliente/login');
-        exit;
+        response()->redirect('/cliente/login');
     }
 
     public function requestMagicLink()
     {
-        $identification = trim($_POST['identificacao'] ?? '');
+        $identification = trim(request()->input('identificacao', ''));
 
         if (empty($identification)) {
             \App\Core\Flash::error('Por favor, informe sua Identificação.');
-            header('Location: /cliente/login');
-            exit;
+            response()->redirect('/cliente/login');
         }
 
-        $user = User::where('role', 'client')
+        $user = User::where('role', \App\Enums\UserRole::Client->value)
             ->where(function($q) use ($identification) {
                 $q->where('email', $identification)
                   ->orWhere('phone', $identification)
@@ -109,7 +104,6 @@ class AuthController
             \App\Services\EmailQueueService::enqueue($user->email, $user->name, 'Seu Código de Acesso ao Portal', $body);
         }
 
-        header('Location: /cliente/login');
-        exit;
+        response()->redirect('/cliente/login');
     }
 }

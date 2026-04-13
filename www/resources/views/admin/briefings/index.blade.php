@@ -50,9 +50,9 @@
                                     'cancelado' => 'bg-danger',
                                     'finalizado' => 'bg-success'
                                 ];
-                                $color = $statusColors[$briefing->status] ?? 'bg-secondary';
+                                $color = $statusColors[$briefing->status?->value] ?? 'bg-secondary';
                             @endphp
-                            <span class="badge {{ $color }}">{{ strtoupper($briefing->status) }}</span>
+                            <span class="badge {{ $color }}">{{ strtoupper($briefing->status?->value) }}</span>
                         </td>
                         <td class="text-end">
                             <a href="/admin/briefings/{{ $briefing->id }}" class="btn btn-sm btn-outline-gold">

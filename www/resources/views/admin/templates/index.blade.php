@@ -37,10 +37,10 @@
                         </td>
                         <td><span class="badge bg-dark border border-secondary">{{ count($template->form_schema ?? []) }} campos</span></td>
                         <td>
-                            @if($template->status === 'active')
+                            @if($template->status?->value === 'active')
                                 <span class="badge bg-success">Ativo</span>
                             @else
-                                <span class="badge bg-secondary">{{ $template->status }}</span>
+                                <span class="badge bg-secondary">{{ $template->status?->value }}</span>
                             @endif
                         </td>
                         <td class="text-end">

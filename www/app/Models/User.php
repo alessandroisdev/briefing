@@ -25,6 +25,7 @@ class User extends Model
     ];
 
     protected $casts = [
+        'role' => \App\Enums\UserRole::class,
         'magic_link_expires' => 'datetime',
     ];
 

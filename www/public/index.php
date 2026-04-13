@@ -2,10 +2,14 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-// Iniciar sessão de forma segura se já não estiver iniciada
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// Require Helpers directly to ensure they load extremely early before Router
+require_once __DIR__ . '/../app/Core/Helpers.php';
+
+// Iniciar sessão de forma segura e encapsulada
+session();
+
+// Capturar e guardar o Request global do Illuminate/Http
+request();
 
 // Load environment variables
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . '/../');

@@ -18,6 +18,7 @@ class ClientBriefing extends Model
     ];
 
     protected $casts = [
+        'status' => \App\Enums\BriefingStatus::class,
         'form_data' => 'array',
     ];
 

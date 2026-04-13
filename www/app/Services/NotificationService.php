@@ -13,13 +13,13 @@ class NotificationService
      * 
      * @param string $title
      * @param string $message
-     * @param string $type (info, success, warning)
+     * @param \App\Enums\AlertType $type
      * @param string|null $actionUrl
      * @return void
      */
-    public static function sendToAdmins($title, $message, $type = 'info', $actionUrl = null)
+    public static function sendToAdmins($title, $message, \App\Enums\AlertType $type = \App\Enums\AlertType::Info, $actionUrl = null)
     {
-        $admins = User::where('role', 'admin')->get();
+        $admins = User::where('role', \App\Enums\UserRole::Admin->value)->get();
 
         foreach ($admins as $admin) {
             $notification = Notification::create([
@@ -38,7 +38,7 @@ class NotificationService
                 'user_id' => $admin->id,
                 'title' => $title,
                 'message' => $message,
-                'type' => $type,
+                'type' => $type->value,
                 'action_url' => $actionUrl
             ]);
         }

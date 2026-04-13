@@ -16,12 +16,12 @@ class EmailSettingsController
             $settings[$s->key] = $s->value;
         }
 
-        echo View::render('admin.settings.email', ['settings' => $settings]);
+        response(View::render('admin.settings.email', ['settings' => $settings]))->send();
     }
 
     public function save()
     {
-        $data = $_POST;
+        $data = request()->all();
         
         $keys = ['smtp_host', 'smtp_port', 'smtp_user', 'smtp_pass', 'smtp_secure', 'from_email', 'from_name'];
 
@@ -35,7 +35,6 @@ class EmailSettingsController
         }
 
         Flash::success('Configurações de E-mail salvas com sucesso!');
-        header('Location: /admin/settings/email');
-        exit;
+        response()->redirect('/admin/settings/email');
     }
 }

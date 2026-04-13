@@ -17,6 +17,7 @@ class Client extends Model
     ];
 
     protected $casts = [
+        'status' => \App\Enums\ActiveStatus::class,
         'pending_updates' => 'array',
     ];
 

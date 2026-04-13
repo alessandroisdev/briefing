@@ -16,6 +16,7 @@ class BriefingTemplate extends Model
     ];
 
     protected $casts = [
+        'status' => \App\Enums\ActiveStatus::class,
         'form_schema' => 'array',
     ];
 }

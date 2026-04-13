@@ -23,8 +23,8 @@
                     <div class="col-md-4 mb-4">
                         <label class="form-label text-white">Status</label>
                         <select name="status" class="form-control form-control-lg">
-                            <option value="active" {{ $template->status === 'active' ? 'selected' : '' }}>Ativo</option>
-                            <option value="inactive" {{ $template->status === 'inactive' ? 'selected' : '' }}>Inativo</option>
+                            <option value="active" {{ $template->status?->value === 'active' ? 'selected' : '' }}>Ativo</option>
+                            <option value="inactive" {{ $template->status?->value === 'inactive' ? 'selected' : '' }}>Inativo</option>
                         </select>
                     </div>
                 </div>

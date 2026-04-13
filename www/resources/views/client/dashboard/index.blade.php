@@ -37,12 +37,12 @@
                     <tbody>
                         @forelse($briefings as $briefing)
                         @php
-                            $statusInfo = match($briefing->status) {
+                            $statusInfo = match($briefing->status?->value) {
                                 'pending' => ['bg' => 'bg-warning text-dark', 'text' => 'Aguardando Respostas', 'btn' => 'Preencher', 'btn_class' => 'btn-gold', 'icon' => 'bi-pencil-square'],
                                 'in_progress' => ['bg' => 'bg-info text-dark', 'text' => 'Em Preenchimento', 'btn' => 'Continuar', 'btn_class' => 'btn-outline-info', 'icon' => 'bi-pencil'],
                                 'submitted' => ['bg' => 'bg-success', 'text' => 'Enviado para Análise', 'btn' => 'Visualizar', 'btn_class' => 'btn-outline-light', 'icon' => 'bi-eye'],
                                 'approved' => ['bg' => 'bg-primary', 'text' => 'Aprovado', 'btn' => 'Acessar', 'btn_class' => 'btn-outline-light', 'icon' => 'bi-check2-circle'],
-                                default => ['bg' => 'bg-secondary', 'text' => ucfirst($briefing->status), 'btn' => 'Ver', 'btn_class' => 'btn-outline-light', 'icon' => 'bi-eye'],
+                                default => ['bg' => 'bg-secondary', 'text' => ucfirst($briefing->status?->value), 'btn' => 'Ver', 'btn_class' => 'btn-outline-light', 'icon' => 'bi-eye'],
                             };
                         @endphp
                         <tr>

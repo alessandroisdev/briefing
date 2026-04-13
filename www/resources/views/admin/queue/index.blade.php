@@ -39,9 +39,9 @@
                         </td>
                         <td class="py-3 text-light">{{ $job->subject }}</td>
                         <td class="py-3">
-                            @if($job->status === 'sent')
+                            @if($job->status?->value === 'sent')
                                 <span class="badge bg-success bg-opacity-25 text-success px-2 py-1">Enviado</span>
-                            @elseif($job->status === 'failed')
+                            @elseif($job->status?->value === 'failed')
                                 <span class="badge bg-danger bg-opacity-25 text-danger px-2 py-1" title="{{ $job->error_message }}">Falhou</span>
                             @else
                                 <span class="badge bg-warning bg-opacity-25 text-warning px-2 py-1">Na Fila</span>
@@ -52,7 +52,7 @@
                             <small class="text-secondary">Tentativas: {{ $job->attempts }}</small>
                         </td>
                         <td class="py-3 px-4 text-end">
-                            @if($job->status === 'failed')
+                            @if($job->status?->value === 'failed')
                             <div class="d-flex justify-content-end gap-2">
                                 <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#errorModal{{ $job->id }}" title="Ver detalhe do Erro">
                                     <i class="bi bi-bug"></i> Ver Erro

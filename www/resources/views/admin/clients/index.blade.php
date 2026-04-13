@@ -53,10 +53,10 @@
                             @endif
                         </td>
                         <td>
-                            @if($client->status === 'active')
+                            @if($client->status?->value === 'active')
                                 <span class="badge bg-success">Ativo</span>
                             @else
-                                <span class="badge bg-secondary">{{ $client->status }}</span>
+                                <span class="badge bg-secondary">{{ $client->status?->value }}</span>
                             @endif
                         </td>
                         <td class="text-end">

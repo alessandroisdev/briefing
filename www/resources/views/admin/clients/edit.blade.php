@@ -46,8 +46,8 @@
                     <div class="col-md-4 mb-3">
                         <label class="form-label ps-1">Status</label>
                         <select name="status" class="form-control">
-                            <option value="active" {{ $client->status == 'active' ? 'selected' : '' }}>Ativo</option>
-                            <option value="inactive" {{ $client->status == 'inactive' ? 'selected' : '' }}>Inativo</option>
+                            <option value="active" {{ $client->status?->value == 'active' ? 'selected' : '' }}>Ativo</option>
+                            <option value="inactive" {{ $client->status?->value == 'inactive' ? 'selected' : '' }}>Inativo</option>
                         </select>
                     </div>
                 </div>

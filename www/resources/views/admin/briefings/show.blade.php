@@ -6,17 +6,17 @@
 <header class="d-flex justify-content-between align-items-center mb-5">
     <div>
         <a href="/admin/briefings" class="text-decoration-none" style="color: #94a3b8;"><i class="bi bi-arrow-left"></i> Voltar</a>
-        <h2 class="fw-bold text-white mt-2 mb-0">Projeto: {{ $briefing->title }}</h2>
+        <h2 class="fw-bold text-dark mt-2 mb-0">Projeto: {{ $briefing->title }}</h2>
         <p class="text-muted mb-0">Cliente: {{ $briefing->client->company_name ?? 'N/A' }} | Criado em {{ $briefing->created_at->format('d/m/Y') }}</p>
     </div>
     <div>
         <form action="/admin/briefings/{{ $briefing->id }}/status" method="POST" class="d-flex gap-2">
             <select name="status" class="form-select bg-dark text-white border-secondary">
-                <option value="criado" {{ $briefing->status === 'criado' ? 'selected' : '' }}>Aguardando Preenchimento</option>
-                <option value="editando" {{ $briefing->status === 'editando' ? 'selected' : '' }}>Em Edição (Cliente)</option>
-                <option value="executando" {{ $briefing->status === 'executando' ? 'selected' : '' }}>Em Execução (Agência)</option>
-                <option value="finalizado" {{ $briefing->status === 'finalizado' ? 'selected' : '' }}>Finalizado</option>
-                <option value="cancelado" {{ $briefing->status === 'cancelado' ? 'selected' : '' }}>Cancelado</option>
+                <option value="criado" {{ $briefing->status?->value === 'criado' ? 'selected' : '' }}>Aguardando Preenchimento</option>
+                <option value="editando" {{ $briefing->status?->value === 'editando' ? 'selected' : '' }}>Em Edição (Cliente)</option>
+                <option value="executando" {{ $briefing->status?->value === 'executando' ? 'selected' : '' }}>Em Execução (Agência)</option>
+                <option value="finalizado" {{ $briefing->status?->value === 'finalizado' ? 'selected' : '' }}>Finalizado</option>
+                <option value="cancelado" {{ $briefing->status?->value === 'cancelado' ? 'selected' : '' }}>Cancelado</option>
             </select>
             <button type="submit" class="btn btn-gold">Atualizar</button>
         </form>
@@ -35,12 +35,17 @@
                 </div>
             @else
                 <div class="d-flex flex-column gap-4">
-                    @foreach($briefing->form_data as $question => $answer)
-                    <div class="card bg-dark border-secondary">
+                    @foreach($briefing->template->form_schema as $field)
+                    @php
+                        $question = $field['label'];
+                        $phpKeyFallback = str_replace([' ', '.'], '_', $question);
+                        $answer = $briefing->form_data[$question] ?? ($briefing->form_data[$phpKeyFallback] ?? 'Ainda não respondido.');
+                    @endphp
+                    <div class="card bg-dark border-secondary shadow-sm">
                         <div class="card-header bg-transparent border-secondary text-gold fw-bold">
                             {{ $question }}
                         </div>
-                        <div class="card-body text-white">
+                        <div class="card-body text-white" style="background: rgba(0,0,0,0.2);">
                             {!! nl2br(htmlspecialchars($answer)) !!}
                         </div>
                     </div>

@@ -10,27 +10,26 @@ class BriefingTemplateController
     public function index()
     {
         $templates = BriefingTemplate::orderBy('id', 'desc')->get();
-        echo View::render('admin.templates.index', ['templates' => $templates]);
+        response(View::render('admin.templates.index', ['templates' => $templates]))->send();
     }
 
     public function create()
     {
-        echo View::render('admin.templates.create');
+        response(View::render('admin.templates.create'))->send();
     }
 
     public function store()
     {
-        $data = $_POST;
+        $data = request()->all();
         BriefingTemplate::create([
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
             'form_schema' => json_decode($data['form_schema'], true) ?? [],
-            'status' => 'active'
+            'status' => \App\Enums\ActiveStatus::Active
         ]);
 
         \App\Core\Flash::success('Modelo de briefing criado com sucesso!');
-        header('Location: /admin/templates');
-        exit;
+        response()->redirect('/admin/templates');
     }
 
     public function edit($id)
@@ -38,28 +37,31 @@ class BriefingTemplateController
         $template = BriefingTemplate::find($id);
         if (!$template) {
             \App\Core\Flash::error('Modelo não encontrado!');
-            header('Location: /admin/templates');
-            exit;
+            response()->redirect('/admin/templates');
         }
 
-        echo View::render('admin.templates.edit', ['template' => $template]);
+        response(View::render('admin.templates.edit', ['template' => $template]))->send();
     }
 
     public function update($id)
     {
         $template = BriefingTemplate::find($id);
         if ($template) {
-            $data = $_POST;
+            $data = request()->all();
+            
+            // Try to map status enum safely
+            $statusEnum = \App\Enums\ActiveStatus::tryFrom($data['status'] ?? 'active') 
+                          ?? \App\Enums\ActiveStatus::Active;
+                          
             $template->update([
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
                 'form_schema' => json_decode($data['form_schema'], true) ?? [],
-                'status' => $data['status'] ?? 'active'
+                'status' => $statusEnum
             ]);
             \App\Core\Flash::success('Modelo atualizado com sucesso!');
         }
 
-        header('Location: /admin/templates');
-        exit;
+        response()->redirect('/admin/templates');
     }
 }

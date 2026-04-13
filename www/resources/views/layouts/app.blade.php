@@ -31,8 +31,23 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <!-- Links padrão ou dinâmicos -->
-                    @yield('nav_links')
+                    @if(isset($_SESSION['client_id']))
+                        <li class="nav-item">
+                            <a class="nav-link {{ strpos($_SERVER['REQUEST_URI'], '/cliente/dashboard') === 0 || strpos($_SERVER['REQUEST_URI'], '/cliente/briefings') === 0 ? 'active' : '' }}" href="/cliente/dashboard">Meus Projetos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ strpos($_SERVER['REQUEST_URI'], '/cliente/suporte') === 0 ? 'active' : '' }}" href="/cliente/suporte"><i class="bi bi-headset"></i> Suporte</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link {{ strpos($_SERVER['REQUEST_URI'], '/cliente/perfil') === 0 ? 'active' : '' }}" href="/cliente/perfil"><i class="bi bi-person-circle"></i> Perfil</a>
+                        </li>
+                        <li class="nav-item ms-3">
+                            <a class="btn btn-outline-danger btn-sm mt-1" href="/">Sair</a>
+                        </li>
+                    @else
+                        <!-- Links padrão ou dinâmicos -->
+                        @yield('nav_links')
+                    @endif
                 </ul>
             </div>
         </div>

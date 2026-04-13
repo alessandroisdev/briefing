@@ -8,12 +8,11 @@ class DashboardController
 {
     public function index()
     {
-        if (empty($_SESSION['client_id'])) {
-            header('Location: /cliente/login');
-            exit;
+        if (!session()->has('client_id')) {
+            response()->redirect('/cliente/login');
         }
 
-        $user = \App\Models\User::find($_SESSION['client_id']);
+        $user = \App\Models\User::find(session()->get('client_id'));
         $client = \App\Models\Client::where('user_id', $user->id)->first();
         
         $briefings = [];
@@ -24,8 +23,8 @@ class DashboardController
                             ->get();
         }
 
-        echo View::render('client.dashboard.index', [
+        response(View::render('client.dashboard.index', [
             'briefings' => $briefings
-        ]);
+        ]))->send();
     }
 }

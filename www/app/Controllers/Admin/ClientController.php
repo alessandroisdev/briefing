@@ -11,23 +11,22 @@ class ClientController
     public function index()
     {
         $clients = Client::with('user')->orderBy('id', 'desc')->get();
-        echo View::render('admin.clients.index', ['clients' => $clients]);
+        response(View::render('admin.clients.index', ['clients' => $clients]))->send();
     }
 
     public function create()
     {
-        echo View::render('admin.clients.create');
+        response(View::render('admin.clients.create'))->send();
     }
 
     public function store()
     {
-        $data = $_POST;
+        $data = request()->all();
 
         // Validations
         if (User::where('email', $data['email'])->exists()) {
             \App\Core\Flash::error('O email já está em uso.');
-            header('Location: /admin/clients/create');
-            exit;
+            response()->redirect('/admin/clients/create');
         }
 
         // Create User
@@ -36,7 +35,7 @@ class ClientController
         $user->email = $data['email'];
         $user->phone = $data['phone'] ?? null;
         $user->document = $data['document'] ?? null;
-        $user->role = 'client';
+        $user->role = \App\Enums\UserRole::Client;
         
         if (!empty($data['password'])) {
             $user->password = password_hash($data['password'], PASSWORD_DEFAULT);
@@ -49,12 +48,11 @@ class ClientController
         $client->user_id = $user->id;
         $client->company_name = $data['company_name'] ?? null;
         $client->address = $data['address'] ?? null;
-        $client->status = 'active';
+        $client->status = \App\Enums\ActiveStatus::Active;
         $client->save();
 
         \App\Core\Flash::success('Cliente criado com sucesso!');
-        header('Location: /admin/clients');
-        exit;
+        response()->redirect('/admin/clients');
     }
 
     public function edit($id)
@@ -63,11 +61,10 @@ class ClientController
 
         if (!$client) {
             \App\Core\Flash::error('Cliente não localizado.');
-            header('Location: /admin/clients');
-            exit;
+            response()->redirect('/admin/clients');
         }
 
-        echo View::render('admin.clients.edit', ['client' => $client]);
+        response(View::render('admin.clients.edit', ['client' => $client]))->send();
     }
 
     public function update($id)
@@ -75,7 +72,7 @@ class ClientController
         $client = Client::with('user')->find($id);
 
         if ($client) {
-            $data = $_POST;
+            $data = request()->all();
             
             // Only update user if relation exists
             if ($client->user) {
@@ -100,8 +97,7 @@ class ClientController
             \App\Core\Flash::success('Dados do cliente atualizados com sucesso!');
         }
 
-        header('Location: /admin/clients');
-        exit;
+        response()->redirect('/admin/clients');
     }
 
     public function generateMagicLink($id)
@@ -119,7 +115,6 @@ class ClientController
             \App\Core\Flash::success('Login Link (Magic Link) gerado para ' . $client->user->email . '!');
         }
 
-        header('Location: /admin/clients');
-        exit;
+        response()->redirect('/admin/clients');
     }
 }

@@ -23,7 +23,7 @@
                     @php
                         $isUnread = is_null($notif->read_at);
                         $bgClass = $isUnread ? 'bg-dark bg-opacity-50' : 'bg-transparent';
-                        $iconClass = match($notif->type) {
+                        $iconClass = match($notif->type?->value) {
                             'success' => 'bi-check-circle-fill text-success',
                             'warning' => 'bi-exclamation-triangle-fill text-warning',
                             'alert', 'error' => 'bi-x-octagon-fill text-danger',

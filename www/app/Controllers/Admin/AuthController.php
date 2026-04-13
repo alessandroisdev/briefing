@@ -8,13 +8,12 @@ class AuthController
 {
     public function loginForm()
     {
-        echo View::render('admin.auth.login');
+        response(View::render('admin.auth.login'))->send();
     }
 
     public function login()
     {
         // Simple password logic here
-        header('Location: /admin/dashboard');
-        exit;
+        response()->redirect('/admin/dashboard');
     }
 }

@@ -1,6 +1,7 @@
 @extends('layouts.app')
 
 @section('styles')
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 <style>
     /* Ocultar navbar padrão no layout admin para usar a sidebar */
     .navbar { display: none !important; }
@@ -29,6 +30,9 @@
             <a href="/admin/briefings" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/briefings') === 0 ? 'active' : '' }}">
                 <i class="bi bi-ui-checks"></i> Projetos em Andamento
             </a>
+            <a href="/admin/tickets" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/tickets') === 0 ? 'active' : '' }}">
+                <i class="bi bi-headset"></i> Tickets de Suporte
+            </a>
             <div class="mt-4 mb-2 small text-uppercase text-muted fw-bold px-3">Sistema</div>
             <a href="/admin/queue" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/queue') === 0 ? 'active' : '' }}">
                 <i class="bi bi-cloud-arrow-up"></i> Fila de E-mails
@@ -49,7 +53,10 @@
     <main class="main-content d-flex flex-column" style="overflow-y: auto;">
         
         @php
-            $adminUserId = $_SESSION['admin_id'] ?? ($_SESSION['client_id'] ?? 0); // Temporary fallback while true admin auth config is fuzzy
+            // Correção absoluta para pegar Notificações do ADMIN (Nível MVP)
+            $adminUser = \App\Models\User::where('role', \App\Enums\UserRole::Admin->value)->first();
+            $adminUserId = $adminUser ? $adminUser->id : 1; 
+
             $unreadNotifs = \App\Models\Notification::where('user_id', $adminUserId)
                                 ->whereNull('read_at')
                                 ->orderBy('id', 'desc')
@@ -61,14 +68,18 @@
         <!-- Topbar for Admin -->
         <header class="d-flex justify-content-end align-items-center mb-4 px-4 pt-3 w-100">
             <div class="dropdown">
-                <a class="text-decoration-none position-relative text-white dropdown-toggle" href="#" role="button" id="notificationDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="font-size:1.3rem;">
-                    <i class="bi bi-bell"></i>
+                <button class="btn btn-link p-0 text-decoration-none position-relative text-dark" type="button" id="notificationDropdown" onclick="toggleBellDropdown(event)" aria-expanded="false" data-bs-display="static" style="font-size:1.3rem; border: none; box-shadow: none;">
+                    <!-- Inline SVG para garantir visualização independente de CDNs e imports de CSS -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-bell-fill" viewBox="0 0 16 16">
+                      <path d="M8 16a2 2 0 0 0 2-2H6a2 2 0 0 0 2 2m.995-14.901a1 1 0 1 0-1.99 0A5.002 5.002 0 0 0 3 6c0 1.098-.5 6-2 7h14c-1.5-1-2-5.902-2-7 0-2.42-1.72-4.44-4.005-4.901"/>
+                    </svg>
+                    
                     <span id="bellCounters" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size:0.6rem; padding: 0.3em 0.5em; {{ $notifCount == 0 ? 'display:none;' : '' }}">
                         {{ $notifCount }}
                     </span>
-                </a>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm border-0" aria-labelledby="notificationDropdown" style="width: 320px; max-height: 400px; overflow-y: auto; background-color: #212529;">
-                    <li class="px-3 py-2 border-bottom border-secondary d-flex justify-content-between align-items-center">
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0" aria-labelledby="notificationDropdown" style="width: 350px; max-height: 450px; overflow-y: auto; background-color: #1e293b; z-index: 1050 !important;">
+                    <li class="px-4 py-3 border-bottom border-secondary d-flex justify-content-between align-items-center" style="border-color: rgba(255,255,255,0.05) !important;">
                         <span class="text-white fw-bold">Notificações</span>
                         <span class="badge bg-danger" id="bellCounterText">{{ $notifCount }} novas</span>
                     </li>
@@ -104,6 +115,16 @@
 @endsection
 
 @section('scripts')
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+<script>
+    function toggleBellDropdown(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var bellBtn = document.getElementById('notificationDropdown');
+        if (window.bootstrap) {
+            var bsDropdown = bootstrap.Dropdown.getInstance(bellBtn) || new bootstrap.Dropdown(bellBtn);
+            bsDropdown.toggle();
+        }
+    }
+</script>
 @yield('admin_scripts')
 @endsection

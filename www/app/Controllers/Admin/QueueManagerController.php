@@ -20,7 +20,7 @@ class QueueManagerController
         $job = EmailJob::find($id);
 
         if ($job && $job->status === 'failed') {
-            $job->update(['status' => 'pending']);
+            $job->update(['status' => \App\Enums\EmailJobStatus::Pending]);
             
             // Re-push to Redis
             $redis = RedisManager::getClient();
@@ -31,7 +31,6 @@ class QueueManagerController
             Flash::error("Job inválido ou já processado.");
         }
 
-        header('Location: /admin/queue');
-        exit;
+        response()->redirect('/admin/queue');
     }
 }

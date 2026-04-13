@@ -22,6 +22,13 @@ $router->mount('/cliente', function() use ($router) {
     // Client Briefings
     $router->get('/briefings/(\d+)', 'App\Controllers\Client\BriefingController@show');
     $router->post('/briefings/(\d+)/save', 'App\Controllers\Client\BriefingController@save');
+
+    // Client Tickets (Support)
+    $router->get('/suporte', 'App\Controllers\Client\TicketController@index');
+    $router->get('/suporte/novo', 'App\Controllers\Client\TicketController@create');
+    $router->post('/suporte/store', 'App\Controllers\Client\TicketController@store');
+    $router->get('/suporte/(\d+)', 'App\Controllers\Client\TicketController@show');
+    $router->post('/suporte/(\d+)/reply', 'App\Controllers\Client\TicketController@reply');
 });
 
 $router->mount('/admin', function() use ($router) {
@@ -57,7 +64,14 @@ $router->mount('/admin', function() use ($router) {
     $router->get('/briefings/(\d+)', 'App\Controllers\Admin\ClientBriefingController@show');
     $router->post('/briefings/(\d+)/status', 'App\Controllers\Admin\ClientBriefingController@updateStatus');
 
+    // Admin Tickets (Support)
+    $router->get('/tickets', 'App\Controllers\Admin\TicketController@index');
+    $router->get('/tickets/(\d+)', 'App\Controllers\Admin\TicketController@show');
+    $router->post('/tickets/(\d+)/reply', 'App\Controllers\Admin\TicketController@reply');
+    $router->post('/tickets/(\d+)/status', 'App\Controllers\Admin\TicketController@updateStatus');
+
     // Admin Email Settings & Queue
+
     $router->get('/settings/email', 'App\Controllers\Admin\EmailSettingsController@index');
     $router->post('/settings/email', 'App\Controllers\Admin\EmailSettingsController@save');
     $router->get('/queue', 'App\Controllers\Admin\QueueManagerController@index');
