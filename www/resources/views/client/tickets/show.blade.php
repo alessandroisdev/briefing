@@ -32,21 +32,22 @@
                             @if(!$msg->is_internal)
                             <div class="message-bubble mb-4">
                                 <div class="d-flex align-items-center mb-2">
-                                    <div class="avatar bg-dark text-gold rounded-circle d-flex align-items-center justify-content-center me-3 border border-secondary" style="width:40px; height:40px; border-color: {{ $msg->sender->role?->value === 'admin' ? '#D4AF37 !important' : '#475569 !important' }};">
-                                        <i class="bi {{ $msg->sender->role?->value === 'admin' ? 'bi-shield-check' : 'bi-person' }} fs-5"></i>
-                                    </div>
-                                    <div>
-                                        <h6 class="mb-0 {{ $msg->sender->role?->value === 'admin' ? 'text-gold' : 'text-white' }}">
-                                            {{ $msg->sender->name }}
-                                            @if($msg->sender->role?->value === 'admin') <span class="badge bg-gold text-dark ms-2" style="font-size:0.6rem;">SUPORTE DA AGÊNCIA</span> @endif
+                                    <div class="avatar bg-dark text-gold rounded-circle d-flex align-items-center justify-content-center me-3 border border-secondary" style="width:40px; height:40px; border-color: {{ $msg->sender?->role?->value === 'admin' ? '#D4AF37 !important' : '#475569 !important' }};">
+                                    <i class="bi {{ $msg->sender?->role?->value === 'admin' ? 'bi-shield-check' : 'bi-person' }} fs-5"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-0 {{ $msg->sender?->role?->value === 'admin' ? 'text-gold' : 'text-white' }}">
+                                        {{ $msg->sender->name ?? 'Usuário Removido' }}
+                                        @if($msg->sender?->role?->value === 'admin') <span class="badge bg-gold text-dark ms-2" style="font-size:0.6rem;">SUPORTE DA AGÊNCIA</span> @endif
                                         </h6>
                                         <small class="text-muted">{{ date('d/m/Y H:i', strtotime($msg->created_at)) }}</small>
                                     </div>
                                 </div>
-                                <div class="message-content ps-5 ms-3">
-                                    <div class="p-3 rounded-3" style="background-color: {{ $msg->sender->role?->value === 'admin' ? 'rgba(212, 175, 55, 0.05)' : '#0f172a' }}; border: 1px solid {{ $msg->sender->role?->value === 'admin' ? 'rgba(212, 175, 55, 0.2)' : '#1e293b' }}; color:#cbd5e1;">
-                                        {!! nl2br(htmlspecialchars($msg->message)) !!}
-                                    </div>
+                            </div>
+                            <div class="message-content ps-5 ms-3">
+                                <div class="p-3 rounded-3" style="background-color: {{ $msg->sender?->role?->value === 'admin' ? 'rgba(212, 175, 55, 0.05)' : '#0f172a' }}; border: 1px solid {{ $msg->sender?->role?->value === 'admin' ? 'rgba(212, 175, 55, 0.2)' : '#1e293b' }}; color:#cbd5e1;">
+                                    {!! nl2br(htmlspecialchars($msg->message)) !!}
+                                </div>
                                     
                                     @if(count($msg->attachments) > 0)
                                     <div class="attachments mt-2 d-flex flex-wrap gap-2">
@@ -55,9 +56,10 @@
                                             $attUrl = "/cliente/suporte/anexo/" . $att->id;
                                             $ext = strtolower(pathinfo($att->file_name, PATHINFO_EXTENSION));
                                             $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                            $isPdf = $ext === 'pdf';
                                         @endphp
-                                        <a href="javascript:void(0)" onclick="openAttachmentModal('{{ $attUrl }}', {{ $isImage ? 'true' : 'false' }}, '{{ htmlspecialchars($att->file_name, ENT_QUOTES) }}')" class="text-decoration-none bg-dark border border-secondary px-3 py-2 rounded-2 d-flex align-items-center" style="transition:all 0.2s;">
-                                            <i class="bi {{ $isImage ? 'bi-image' : 'bi-paperclip' }} text-gold me-2"></i>
+                                        <a href="javascript:void(0)" onclick="openAttachmentModal('{{ $attUrl }}', {{ $isImage ? 'true' : 'false' }}, {{ $isPdf ? 'true' : 'false' }}, '{{ htmlspecialchars($att->file_name, ENT_QUOTES) }}')" class="text-decoration-none bg-dark border border-secondary px-3 py-2 rounded-2 d-flex align-items-center" style="transition:all 0.2s;">
+                                            <i class="bi {{ $isImage ? 'bi-image' : ($isPdf ? 'bi-file-pdf' : 'bi-paperclip') }} text-gold me-2"></i>
                                             <span class="text-white small fw-semibold">{{ $att->file_name }}</span>
                                         </a>
                                     @endforeach
@@ -117,9 +119,11 @@
             </div>
             <div class="modal-body text-center p-0 bg-black" style="min-height: 250px; display:flex; align-items:center; justify-content:center;">
                 <img id="attachmentImage" src="" style="max-width: 100%; max-height: 70vh; display: none; object-fit: contain;">
+                <iframe id="attachmentPdf" src="" style="width: 100%; height: 75vh; border: none; display: none;"></iframe>
+                
                 <div id="attachmentGeneric" class="p-5 w-100" style="display:none;">
                     <i class="bi bi-file-earmark-arrow-down fs-1 text-muted mb-3 d-block"></i>
-                    <h5 class="text-white mb-2">Este arquivo não é uma imagem nativa</h5>
+                    <h5 class="text-white mb-2">Este arquivo não é uma mídia visual nativa</h5>
                     <p class="text-muted small mb-4">Clique no botão abaixo para baixar ou abrir o documento de mídia seguramente.</p>
                     <a id="attachmentDownloadBtn" href="" target="_blank" class="btn btn-gold px-4 fw-bold text-dark">Abrir / Baixar Arquivo</a>
                 </div>
@@ -129,18 +133,26 @@
 </div>
 
 <script>
-    function openAttachmentModal(url, isImage, filename) {
+    function openAttachmentModal(url, isImage, isPdf, filename) {
         document.getElementById('attachmentModalLabel').innerText = filename;
         const img = document.getElementById('attachmentImage');
+        const pdf = document.getElementById('attachmentPdf');
         const generic = document.getElementById('attachmentGeneric');
         const downloadBtn = document.getElementById('attachmentDownloadBtn');
 
         if (isImage) {
             img.src = url;
             img.style.display = 'block';
+            pdf.style.display = 'none';
+            generic.style.display = 'none';
+        } else if (isPdf) {
+            pdf.src = url;
+            pdf.style.display = 'block';
+            img.style.display = 'none';
             generic.style.display = 'none';
         } else {
             img.style.display = 'none';
+            pdf.style.display = 'none';
             generic.style.display = 'block';
             downloadBtn.href = url;
         }

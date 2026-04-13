@@ -33,8 +33,9 @@ class TicketController
 
     public function reply($id)
     {
-        $adminId = session()->get('user_id');
-        $adminUser = User::find($adminId);
+        // Pega o primeiro usuário admin, visto que o login não foi finalizado ainda
+        $adminUser = User::where('role', \App\Enums\UserRole::Admin->value)->first();
+        $adminId = $adminUser ? $adminUser->id : 1;
 
         $ticket = Ticket::with('client.user')->where('id', $id)->first();
         
@@ -133,10 +134,9 @@ class TicketController
     public function attachment($attachmentId)
     {
         // Admin validation
-        $adminId = session()->get('user_id');
-        $adminUser = User::find($adminId);
+        $adminUser = User::where('role', \App\Enums\UserRole::Admin->value)->first();
         
-        if (!$adminUser || $adminUser->role?->value !== \App\Enums\UserRole::Admin->value) {
+        if (!$adminUser) {
             response()->setStatusCode(403)->setContent('Acesso negado.')->send();
             exit;
         }

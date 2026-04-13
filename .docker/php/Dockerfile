@@ -23,6 +23,9 @@ RUN docker-php-ext-install pdo_mysql mbstring exif pcntl bcmath gd zip
 RUN pecl install redis \
     && docker-php-ext-enable redis
 
+# Set upload size limits
+RUN echo "upload_max_filesize = 100M\npost_max_size = 105M" > /usr/local/etc/php/conf.d/uploads.ini
+
 # Get latest Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
