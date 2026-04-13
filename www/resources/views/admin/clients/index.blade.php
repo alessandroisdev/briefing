@@ -8,12 +8,22 @@
         <h2 class="fw-bold text-white mb-0">Gestão de Clientes</h2>
         <p class="text-muted mb-0" style="color: #94a3b8 !important;">Administre contatos, acessos mágicos e status de projetos</p>
     </div>
-    <div>
         <a href="/admin/clients/create" class="btn btn-gold shadow-sm px-4">
             <i class="bi bi-person-plus-fill"></i> Novo Cliente
         </a>
     </div>
 </header>
+
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-4">
+        <div class="input-group">
+            <span class="input-group-text bg-black border-secondary text-muted border-end-0">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" id="liveSearchInput" class="form-control bg-black border-secondary border-start-0 text-white shadow-none ps-0" placeholder="Buscar cliente por nome ou email...">
+        </div>
+    </div>
+</div>
 
 <div class="card briefing-card">
     <div class="card-body p-0">
@@ -31,7 +41,7 @@
                 </thead>
                 <tbody>
                     @forelse($clients as $client)
-                    <tr>
+                    <tr class="client-row" data-searchable="{{ strtolower(htmlspecialchars(($client->company_name ?? '') . ' ' . ($client->user->name ?? '') . ' ' . ($client->user->email ?? '') . ' ' . ($client->user->phone ?? ''))) }}">
                         <td><span class="text-muted">#{{ $client->id }}</span></td>
                         <td>
                             <strong class="text-white">{{ $client->company_name ?? 'Não Informado' }}</strong>
@@ -85,4 +95,28 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const searchInput = document.getElementById('liveSearchInput');
+        
+        if (searchInput) {
+            searchInput.addEventListener('keyup', function(e) {
+                const term = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('.client-row');
+                
+                rows.forEach(row => {
+                    const searchableText = row.getAttribute('data-searchable') || '';
+                    if (searchableText.toLowerCase().includes(term)) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        }
+    });
+</script>
 @endsection

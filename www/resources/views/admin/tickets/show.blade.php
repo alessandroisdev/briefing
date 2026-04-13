@@ -43,11 +43,22 @@
                                             $ext = strtolower(pathinfo($att->file_name, PATHINFO_EXTENSION));
                                             $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
                                             $isPdf = $ext === 'pdf';
+                                            $isVideo = in_array($ext, ['mp4', 'webm', 'ogg']);
+                                            
+                                            $icon = 'bi-paperclip';
+                                            if($isImage) $icon = 'bi-image';
+                                            if($isPdf) $icon = 'bi-file-pdf';
+                                            if($isVideo) $icon = 'bi-camera-video';
                                         @endphp
-                                        <a href="javascript:void(0)" onclick="openAttachmentModal('{{ $attUrl }}', {{ $isImage ? 'true' : 'false' }}, {{ $isPdf ? 'true' : 'false' }}, '{{ htmlspecialchars($att->file_name, ENT_QUOTES) }}')" class="text-decoration-none bg-dark border border-secondary px-3 py-2 rounded-2 d-flex align-items-center" style="transition:all 0.2s;">
-                                            <i class="bi {{ $isImage ? 'bi-image' : ($isPdf ? 'bi-file-pdf' : 'bi-paperclip') }} text-gold me-2"></i>
-                                            <span class="text-white small fw-semibold">{{ $att->file_name }}</span>
-                                        </a>
+                                        <div class="btn-group shadow-sm bg-black border border-secondary rounded-2">
+                                            <a href="javascript:void(0)" onclick="openAttachmentModal('{{ $attUrl }}', {{ $isImage ? 'true' : 'false' }}, {{ $isPdf ? 'true' : 'false' }}, {{ $isVideo ? 'true' : 'false' }}, '{{ htmlspecialchars($att->file_name, ENT_QUOTES) }}', '{{ $ext }}')" class="btn btn-dark text-decoration-none px-3 py-2 d-flex align-items-center border-0" style="transition:all 0.2s;">
+                                                <i class="bi {{ $icon }} text-gold me-2"></i>
+                                                <span class="text-white small fw-semibold">{{ $att->file_name }}</span>
+                                            </a>
+                                            <a href="{{ $attUrl }}" download class="btn btn-secondary border-0 px-3 py-2 d-flex align-items-center bg-transparent border-start border-secondary" title="Baixar" style="border-left: 1px solid #334155 !important;">
+                                                <i class="bi bi-download text-muted"></i>
+                                            </a>
+                                        </div>
                                     @endforeach
                                 </div>
                                 @endif
@@ -153,9 +164,15 @@
                 <h5 class="modal-title text-white" id="attachmentModalLabel"></h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body text-center p-0 bg-black" style="min-height: 250px; display:flex; align-items:center; justify-content:center;">
+            <div class="modal-body text-center p-0 bg-black" style="min-height: 250px; display:flex; align-items:center; justify-content:center; flex-direction: column;">
                 <img id="attachmentImage" src="" style="max-width: 100%; max-height: 70vh; display: none; object-fit: contain;">
                 <iframe id="attachmentPdf" src="" style="width: 100%; height: 75vh; border: none; display: none;"></iframe>
+                
+                <div id="attachmentVideoContainer" style="width: 100%; max-height: 75vh; display: none;">
+                    <video id="attachmentVideo" playsinline controls style="max-width: 100%;">
+                        <source src="" id="attachmentVideoSource" />
+                    </video>
+                </div>
                 
                 <div id="attachmentGeneric" class="p-5 w-100" style="display:none;">
                     <i class="bi bi-file-earmark-arrow-down fs-1 text-muted mb-3 d-block"></i>
@@ -168,27 +185,56 @@
     </div>
 </div>
 
+<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css" />
+<script src="https://cdn.plyr.io/3.7.8/plyr.polyfilled.js"></script>
+
 <script>
-    function openAttachmentModal(url, isImage, isPdf, filename) {
+    let plyrInstance = null;
+
+    function openAttachmentModal(url, isImage, isPdf, isVideo, filename, ext) {
         document.getElementById('attachmentModalLabel').innerText = filename;
         const img = document.getElementById('attachmentImage');
         const pdf = document.getElementById('attachmentPdf');
+        const videoContainer = document.getElementById('attachmentVideoContainer');
+        const video = document.getElementById('attachmentVideo');
+        const videoSource = document.getElementById('attachmentVideoSource');
         const generic = document.getElementById('attachmentGeneric');
         const downloadBtn = document.getElementById('attachmentDownloadBtn');
+
+        if (plyrInstance) {
+            plyrInstance.destroy();
+            plyrInstance = null;
+        }
 
         if (isImage) {
             img.src = url;
             img.style.display = 'block';
             pdf.style.display = 'none';
+            videoContainer.style.display = 'none';
             generic.style.display = 'none';
         } else if (isPdf) {
             pdf.src = url;
             pdf.style.display = 'block';
             img.style.display = 'none';
+            videoContainer.style.display = 'none';
             generic.style.display = 'none';
+        } else if (isVideo) {
+            videoSource.src = url;
+            videoSource.type = "video/" + ext;
+            video.load();
+            
+            img.style.display = 'none';
+            pdf.style.display = 'none';
+            generic.style.display = 'none';
+            videoContainer.style.display = 'block';
+            
+            plyrInstance = new Plyr('#attachmentVideo', {
+                controls: ['play-large', 'play', 'progress', 'current-time', 'mute', 'volume', 'fullscreen']
+            });
         } else {
             img.style.display = 'none';
             pdf.style.display = 'none';
+            videoContainer.style.display = 'none';
             generic.style.display = 'block';
             downloadBtn.href = url;
         }
@@ -198,6 +244,12 @@
             modal.show();
         }
     }
+
+    document.getElementById('attachmentModal').addEventListener('hidden.bs.modal', function () {
+        if (plyrInstance) {
+            plyrInstance.stop();
+        }
+    });
     function updateFileLabel() {
         const input = document.getElementById('fileUpload');
         const label = document.getElementById('fileLabel');

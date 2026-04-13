@@ -24,11 +24,31 @@ class TicketController
         $client = \App\Models\Client::where('user_id', $clientId)->first();
 
         $tickets = \Illuminate\Database\Eloquent\Collection::make([]);
+        
+        $q = request()->input('q');
+        $status = request()->input('status');
+
         if ($client) {
-            $tickets = Ticket::where('client_id', $client->id)->orderBy('updated_at', 'desc')->get();
+            $query = Ticket::where('client_id', $client->id);
+            
+            if (!empty($status)) {
+                $query->where('status', $status);
+            }
+            
+            if (!empty($q)) {
+                $query->where(function($builder) use ($q) {
+                    $builder->where('subject', 'like', "%{$q}%")
+                            ->orWhere('id', 'like', "%{$q}%");
+                });
+            }
+            
+            $tickets = $query->orderBy('updated_at', 'desc')->get();
         }
 
-        response(View::render('client.tickets.index', ['tickets' => $tickets]))->send();
+        response(View::render('client.tickets.index', [
+            'tickets' => $tickets,
+            'filters' => ['q' => $q, 'status' => $status]
+        ]))->send();
     }
 
     public function create()

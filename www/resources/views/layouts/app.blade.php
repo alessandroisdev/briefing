@@ -19,11 +19,12 @@
             echo '<link rel="stylesheet" href="http://localhost:5173/build/resources/sass/app.scss">';
         }
     @endphp
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     @yield('styles')
 </head>
-<body class="bg-light">
+<body class="bg-dark text-white" style="min-height: 100vh; background-color: #09101f !important;">
     
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 shadow-sm">
+    <nav class="navbar navbar-expand-lg border-bottom border-secondary mb-4 shadow-sm" style="background-color: rgba(16, 28, 56, 0.8) !important; backdrop-filter: blur(10px);">
         <div class="container">
             <a class="navbar-brand fw-bold" href="#">BriefingApp</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">

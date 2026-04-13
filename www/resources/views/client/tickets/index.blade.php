@@ -42,6 +42,37 @@
         </div>
     </div>
 
+    <!-- Toolbar / Filtros -->
+    <div class="card bg-dark border-secondary shadow-sm mb-4">
+        <div class="card-body p-3">
+            <form action="" method="GET" class="d-flex flex-wrap gap-3">
+                <div class="flex-grow-1">
+                    <div class="input-group">
+                        <span class="input-group-text bg-black border-secondary text-muted border-end-0">
+                            <i class="bi bi-search"></i>
+                        </span>
+                        <input type="text" name="q" class="form-control bg-black border-secondary border-start-0 text-white shadow-none ps-0" placeholder="Buscar por assunto ou ID..." value="{{ $filters['q'] ?? '' }}">
+                    </div>
+                </div>
+                <div style="min-width: 200px;">
+                    <select name="status" class="form-select bg-black border-secondary text-white shadow-none">
+                        <option value="">Qualquer Status</option>
+                        <option value="open" {{ ($filters['status'] ?? '') == 'open' ? 'selected' : '' }}>Aberto</option>
+                        <option value="answered" {{ ($filters['status'] ?? '') == 'answered' ? 'selected' : '' }}>Respondido (Agência)</option>
+                        <option value="waiting_client" {{ ($filters['status'] ?? '') == 'waiting_client' ? 'selected' : '' }}>Aguardando Sua Resposta</option>
+                        <option value="closed" {{ ($filters['status'] ?? '') == 'closed' ? 'selected' : '' }}>Encerrado</option>
+                    </select>
+                </div>
+                <div>
+                    <button type="submit" class="btn btn-outline-gold px-4">Filtrar</button>
+                    @if(!empty($filters['q']) || !empty($filters['status']))
+                        <a href="/cliente/suporte" class="btn btn-link text-muted ms-2 text-decoration-none">Limpar</a>
+                    @endif
+                </div>
+            </form>
+        </div>
+    </div>
+
     <div class="card bg-dark border-secondary shadow-sm">
         <div class="card-body p-0">
             <div class="table-responsive">

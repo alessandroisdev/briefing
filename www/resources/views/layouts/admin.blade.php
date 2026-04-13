@@ -9,7 +9,7 @@
 @endsection
 
 @section('content')
-<div class="admin-layout mx-n3" style="max-width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); height: 100vh;">
+<div class="admin-layout mx-n3" style="max-width: 100vw; margin-left: calc(-50vw + 50%); margin-right: calc(-50vw + 50%); height: 100vh; background-color: #09101f;">
     <!-- Sidebar -->
     <aside class="sidebar">
         <div class="mb-5 px-3 mt-3">

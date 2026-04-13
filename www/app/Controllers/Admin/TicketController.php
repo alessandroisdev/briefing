@@ -13,8 +13,35 @@ class TicketController
 {
     public function index()
     {
-        $tickets = Ticket::with('client.user')->orderBy('updated_at', 'desc')->get();
-        response(View::render('admin.tickets.index', ['tickets' => $tickets]))->send();
+        $q = request()->input('q');
+        $status = request()->input('status');
+        $clientId = request()->input('client_id');
+
+        $query = Ticket::with('client.user');
+
+        if (!empty($status)) {
+            $query->where('status', $status);
+        }
+
+        if (!empty($clientId)) {
+            $query->where('client_id', $clientId);
+        }
+
+        if (!empty($q)) {
+            $query->where(function($builder) use ($q) {
+                $builder->where('subject', 'like', "%{$q}%")
+                        ->orWhere('id', 'like', "%{$q}%");
+            });
+        }
+
+        $tickets = $query->orderBy('updated_at', 'desc')->get();
+        $clients = \App\Models\Client::with('user')->get();
+
+        response(View::render('admin.tickets.index', [
+            'tickets' => $tickets,
+            'clients' => $clients,
+            'filters' => ['q' => $q, 'status' => $status, 'client_id' => $clientId]
+        ]))->send();
     }
 
     public function show($id)
