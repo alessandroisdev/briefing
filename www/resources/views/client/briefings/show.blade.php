@@ -20,13 +20,6 @@
         </div>
         @endif
 
-        @if(isset($_GET['success']))
-        <div class="alert alert-success d-flex align-items-center" role="alert" style="background-color: rgba(25, 135, 84, 0.1); border-color: #198754; color: #fff;">
-            <i class="bi bi-check-circle-fill me-3 fs-4 text-success"></i>
-            <div>Suas respostas foram salvas com sucesso!</div>
-        </div>
-        @endif
-
         <div class="card briefing-card p-4 p-md-5 border-top border-warning border-4" style="border-top-color: #D4AF37 !important;">
             <h4 class="text-white mb-4">Formulário</h4>
             

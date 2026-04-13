@@ -42,8 +42,26 @@
         @yield('content')
     </main>
 
-    <!-- Toast de Notificações em Tempo Real -->
-    <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <!-- Toast Container para Múltiplas Notificações -->
+    <div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 1055;">
+        
+        <!-- Toasts Flash (Sessão PHP) -->
+        @php
+            $flashMessages = \App\Core\Flash::get();
+        @endphp
+        
+        @foreach($flashMessages as $msg)
+            <div class="toast align-items-center text-white bg-{{ $msg['type'] }} border-0 mb-2 active-flash-toast" role="alert" aria-live="assertive" aria-atomic="true">
+                <div class="d-flex">
+                    <div class="toast-body fw-bold">
+                        <i class="bi bi-info-circle-fill me-2"></i> {{ $msg['message'] }}
+                    </div>
+                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+                </div>
+            </div>
+        @endforeach
+
+        <!-- Toast de Notificações em Tempo Real (SSE) -->
         <div id="liveToast" class="toast align-items-center text-white bg-gold border-0" role="alert" aria-live="assertive" aria-atomic="true" style="background-color: #D4AF37 !important; color: #09101f !important;">
             <div class="d-flex">
                 <div class="toast-body fw-bold">
@@ -54,37 +72,118 @@
         </div>
     </div>
 
+    <!-- Bootstrap Modal Global para Confirmação de Ações -->
+    <div class="modal fade" id="confirmModal" tabindex="-1" aria-labelledby="confirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content bg-dark border-secondary">
+                <div class="modal-header border-secondary text-white">
+                    <h5 class="modal-title fw-bold" id="confirmModalLabel"><i class="bi bi-exclamation-triangle-fill text-warning me-2"></i> Confirmar Ação</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-white" id="confirmModalBody">
+                    Tem certeza que deseja continuar com esta ação irreversível?
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancelar</button>
+                    <a href="#" class="btn btn-danger fw-bold" id="confirmModalBtn">Sim, continuar</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Bootstrap Bundle JS + Quill -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
     @yield('scripts')
 
-    <!-- SSE Listener para Notificações ao Cliente -->
+    <!-- UI/UX Feedbacks & SSE Listener Globais -->
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const evtSource = new EventSource("/sse/stream");
             
+            // 1. Mostrar os Flash Toasts vindos do Backend
+            const flashToasts = document.querySelectorAll('.active-flash-toast');
+            flashToasts.forEach(toastEl => {
+                const toast = new bootstrap.Toast(toastEl, { delay: 5000 });
+                toast.show();
+            });
+
+            // 2. Bloquear botões de submit e adicionar SPINNER global (Loading State)
+            const forms = document.querySelectorAll('form');
+            forms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    if (this.dataset.noLoading === 'true') return;
+
+                    const btn = this.querySelector('button[type="submit"]');
+                    if (btn) {
+                        btn.disabled = true;
+                        // Guarda o texto original e troca por Spinner nativo
+                        if (!btn.dataset.originalText) {
+                            btn.dataset.originalText = btn.innerHTML;
+                        }
+                        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Aguarde...';
+                    }
+                });
+            });
+
+            // 3. Modal de Confirmação para botões perigosos (.btn-delete ou data-confirm="true")
+            const confirmButtons = document.querySelectorAll('.btn-delete, [data-confirm="true"]');
+            confirmButtons.forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const actionUrl = this.href;
+                    const message = this.dataset.confirmMessage || 'Tem certeza que deseja continuar com esta ação irreversível?';
+                    
+                    document.getElementById('confirmModalBody').innerText = message;
+                    
+                    const confirmModalEl = document.getElementById('confirmModal');
+                    const modal = new bootstrap.Toast(confirmModalEl); // workaround fallback, using Modal below
+                    const bsModal = new bootstrap.Modal(confirmModalEl);
+                    
+                    // Adicionando href dinâmico ao botão do modal se for âncora
+                    const confirmActionBtn = document.getElementById('confirmModalBtn');
+                    
+                    if(this.tagName === 'A') {
+                        confirmActionBtn.href = actionUrl;
+                        confirmActionBtn.onclick = null; // clears previous
+                        confirmActionBtn.innerHTML = '<span id="confirm-spinner"></span> Sim, continuar';
+                        
+                        confirmActionBtn.addEventListener('click', function() {
+                            this.classList.add('disabled');
+                            document.getElementById('confirm-spinner').className = 'spinner-border spinner-border-sm me-2';
+                        });
+                    } else if (this.tagName === 'BUTTON' && this.closest('form')) {
+                        const parentForm = this.closest('form');
+                        confirmActionBtn.href = '#';
+                        confirmActionBtn.onclick = function(e) {
+                            e.preventDefault();
+                            confirmActionBtn.classList.add('disabled');
+                            confirmActionBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Processando...';
+                            parentForm.submit();
+                        }
+                    }
+                    
+                    bsModal.show();
+                });
+            });
+
+            // 4. SSE Listener para Notificações PUSH do Cliente via Redis
+            const evtSource = new EventSource("/sse/stream");
             evtSource.onmessage = function(event) {
                 if(!event.data) return;
-
                 try {
                     const data = JSON.parse(event.data);
-                    
                     if (data.event === 'status_changed' || data.message) {
                         const toastEl = document.getElementById('liveToast');
                         document.getElementById('toastMessage').innerText = data.message;
                         const toast = new bootstrap.Toast(toastEl);
                         toast.show();
                         
-                        // Atualiza a tela se o cliente estiver focado na página sendo notificada
                         if(data.briefing_id && window.location.href.includes('briefings/' + data.briefing_id)) {
-                            setTimeout(() => {
-                                window.location.reload();
-                            }, 3500);
+                            setTimeout(() => { window.location.reload(); }, 3500);
                         }
                     }
                 } catch(e) {
-                    console.error("Non-JSON message received:", event.data);
+                    // Ignore parsings
                 }
             };
         });

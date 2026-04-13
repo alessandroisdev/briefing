@@ -51,7 +51,9 @@ class BriefingController
             'status' => 'editando' // Updates status to indicate client has interacted
         ]);
 
-        header('Location: /cliente/briefings/' . $id . '?success=1');
+        \App\Core\Flash::success('Suas respostas foram salvas com sucesso!');
+
+        header('Location: /cliente/briefings/' . $id);
         exit;
     }
 }

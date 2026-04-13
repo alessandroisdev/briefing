@@ -21,32 +21,33 @@ class ClientController
 
     public function store()
     {
-        // For pure PHP, we handle $_POST directly
         $data = $_POST;
 
-        // Simple validation mock
-        if (empty($data['company_name']) || empty($data['email'])) {
-            header('Location: /admin/clients/create?error=mission_fields');
+        // Validations
+        if (User::where('email', $data['email'])->exists()) {
+            \App\Core\Flash::error('O email já está em uso.');
+            header('Location: /admin/clients/create');
             exit;
         }
 
         // Create User
-        $user = User::create([
-            'name' => $data['name'],
-            'email' => $data['email'],
-            'phone' => $data['phone'] ?? null,
-            'document' => $data['document'] ?? null,
-            'role' => 'client',
-            // No password by default for magic link
-        ]);
+        $user = clone new User();
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->phone = $data['phone'] ?? null;
+        $user->document = $data['document'] ?? null;
+        $user->role = 'client';
+        $user->save();
 
-        // Create Client
-        Client::create([
-            'user_id' => $user->id,
-            'company_name' => $data['company_name'],
-            'status' => 'active'
-        ]);
+        // Create Client specific data
+        $client = clone new Client();
+        $client->user_id = $user->id;
+        $client->company_name = $data['company_name'] ?? null;
+        $client->address = $data['address'] ?? null;
+        $client->status = 'active';
+        $client->save();
 
+        \App\Core\Flash::success('Cliente criado com sucesso!');
         header('Location: /admin/clients');
         exit;
     }
@@ -56,6 +57,7 @@ class ClientController
         $client = Client::with('user')->find($id);
 
         if (!$client) {
+            \App\Core\Flash::error('Cliente não localizado.');
             header('Location: /admin/clients');
             exit;
         }
@@ -65,24 +67,29 @@ class ClientController
 
     public function update($id)
     {
-        $data = $_POST;
         $client = Client::with('user')->find($id);
 
         if ($client) {
-            $client->update([
-                'company_name' => $data['company_name'],
-                'status' => $data['status']
-            ]);
+            $data = $_POST;
+            
+            // Only update user if relation exists
+            if ($client->user) {
+                $client->user->update([
+                    'name' => $data['name'],
+                    'phone' => $data['phone'] ?? null,
+                    'document' => $data['document'] ?? null,
+                ]);
+            }
 
-            $client->user->update([
-                'name' => $data['name'],
-                'email' => $data['email'],
-                'phone' => $data['phone'] ?? null,
-                'document' => $data['document'] ?? null,
+            $client->update([
+                'company_name' => $data['company_name'] ?? null,
+                'address' => $data['address'] ?? null,
             ]);
+            
+            \App\Core\Flash::success('Dados do cliente atualizados com sucesso!');
         }
 
-        header('Location: /admin/clients/' . $client->id . '/edit');
+        header('Location: /admin/clients');
         exit;
     }
 
@@ -91,16 +98,14 @@ class ClientController
         $client = Client::with('user')->find($id);
 
         if ($client && $client->user) {
-            // Generate a secure random token
             $token = bin2hex(random_bytes(32));
             
             $client->user->update([
                 'magic_link_token' => $token,
-                'magic_link_expires' => date('Y-m-d H:i:s', strtotime('+24 hours'))
+                'magic_link_expires' => date('Y-m-d H:i:s', strtotime('+24 hours')),
             ]);
 
-            header('Location: /admin/clients/' . $client->id . '/edit?magic_link=' . $token);
-            exit;
+            \App\Core\Flash::success('Login Link (Magic Link) gerado para ' . $client->user->email . '!');
         }
 
         header('Location: /admin/clients');

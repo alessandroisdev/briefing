@@ -21,20 +21,14 @@ class BriefingTemplateController
     public function store()
     {
         $data = $_POST;
-        
-        // Simulating JSON dynamic schema building from a frontend drag&drop or text array
-        // For now, we expect "form_schema" to be a valid JSON payload string via a hidden input 
-        // compiled by our JS module on the frontend
-        
-        $formSchema = json_decode($data['form_schema'] ?? '[]', true);
-
         BriefingTemplate::create([
             'title' => $data['title'],
             'description' => $data['description'] ?? null,
-            'form_schema' => $formSchema,
-            'status' => $data['status'] ?? 'active'
+            'form_schema' => json_decode($data['form_schema'], true) ?? [],
+            'status' => 'active'
         ]);
 
+        \App\Core\Flash::success('Modelo de briefing criado com sucesso!');
         header('Location: /admin/templates');
         exit;
     }
@@ -43,6 +37,7 @@ class BriefingTemplateController
     {
         $template = BriefingTemplate::find($id);
         if (!$template) {
+            \App\Core\Flash::error('Modelo não encontrado!');
             header('Location: /admin/templates');
             exit;
         }
@@ -52,17 +47,16 @@ class BriefingTemplateController
 
     public function update($id)
     {
-        $data = $_POST;
         $template = BriefingTemplate::find($id);
-
         if ($template) {
-            $formSchema = json_decode($data['form_schema'] ?? '[]', true);
+            $data = $_POST;
             $template->update([
                 'title' => $data['title'],
                 'description' => $data['description'] ?? null,
-                'form_schema' => $formSchema,
+                'form_schema' => json_decode($data['form_schema'], true) ?? [],
                 'status' => $data['status'] ?? 'active'
             ]);
+            \App\Core\Flash::success('Modelo atualizado com sucesso!');
         }
 
         header('Location: /admin/templates');

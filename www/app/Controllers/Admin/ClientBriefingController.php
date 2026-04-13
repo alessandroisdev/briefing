@@ -28,6 +28,7 @@ class ClientBriefingController
         
         $template = BriefingTemplate::find($data['template_id']);
         if (!$template) {
+            \App\Core\Flash::error('O modelo de briefing selecionado não foi encontrado!');
             header('Location: /admin/briefings/create');
             exit;
         }
@@ -40,6 +41,7 @@ class ClientBriefingController
             // form_data will be populated by the client
         ]);
 
+        \App\Core\Flash::success('Projeto/Briefing associado ao cliente com sucesso!');
         header('Location: /admin/briefings');
         exit;
     }
@@ -49,6 +51,7 @@ class ClientBriefingController
         $briefing = ClientBriefing::with(['client.user', 'template'])->find($id);
 
         if (!$briefing) {
+            \App\Core\Flash::error('Projeto não encontrado!');
             header('Location: /admin/briefings');
             exit;
         }
@@ -74,6 +77,7 @@ class ClientBriefingController
                     'message' => "O status do projeto #{$briefing->id} foi alterado para: " . strtoupper($data['status'])
                 ]);
             }
+            \App\Core\Flash::success('Status atualizado com sucesso!');
         }
 
         header('Location: /admin/briefings/' . $id);
