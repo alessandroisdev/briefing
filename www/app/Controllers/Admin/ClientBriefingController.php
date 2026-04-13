@@ -6,6 +6,9 @@ use App\Core\View;
 use App\Models\ClientBriefing;
 use App\Models\Client;
 use App\Models\BriefingTemplate;
+use App\Models\BriefingMessage;
+use App\Models\ProjectCredential;
+use App\Models\MessageTemplate;
 
 class ClientBriefingController
 {
@@ -46,14 +49,20 @@ class ClientBriefingController
 
     public function show($id)
     {
-        $briefing = ClientBriefing::with(['client.user', 'template'])->find($id);
+        $briefing = ClientBriefing::with(['client.user', 'template', 'messages.sender', 'credentials'])->find($id);
 
         if (!$briefing) {
             \App\Core\Flash::error('Projeto não encontrado!');
             response()->redirect('/admin/briefings');
+            exit;
         }
 
-        response(View::render('admin.briefings.show', ['briefing' => $briefing]))->send();
+        $messageTemplates = MessageTemplate::orderBy('title', 'asc')->get();
+
+        response(View::render('admin.briefings.show', [
+            'briefing' => $briefing,
+            'messageTemplates' => $messageTemplates
+        ]))->send();
     }
 
     public function updateStatus($id)
@@ -78,5 +87,70 @@ class ClientBriefingController
         }
 
         response()->redirect('/admin/briefings/' . $id);
+    }
+
+    public function storeMessage($id)
+    {
+        $data = request()->all();
+        $adminUser = \App\Models\User::where('role', \App\Enums\UserRole::Admin->value)->first();
+        $adminUserId = $adminUser ? $adminUser->id : 1; 
+
+        $isInternal = isset($data['is_internal']) ? true : false;
+
+        BriefingMessage::create([
+            'briefing_id' => $id,
+            'sender_id' => $adminUserId,
+            'message' => $data['message'],
+            'is_internal' => $isInternal
+        ]);
+
+        if (!$isInternal) {
+            $briefing = ClientBriefing::with('client.user')->find($id);
+            if ($briefing && $briefing->client && $briefing->client->user) {
+                \App\Services\EmailQueueService::push(
+                    $briefing->client->user->email,
+                    $briefing->client->user->name,
+                    "Atualização no Projeto: {$briefing->title}",
+                    "<h4>Olá {$briefing->client->user->name},</h4><p>Há uma nova mensagem da agência no seu projeto <b>{$briefing->title}</b>.</p><div style='text-align: center; margin-top: 20px;'><a href='" . env('APP_URL') . "/cliente/briefings/{$briefing->id}' class='button'>Acessar o Painel</a></div>"
+                );
+            }
+        }
+
+        \App\Core\Flash::success('Mensagem enviada no painel do projeto!');
+        response()->redirect('/admin/briefings/' . $id . '#tab-messages');
+    }
+
+    public function storeCredential($id)
+    {
+        $data = request()->all();
+
+        ProjectCredential::create([
+            'briefing_id' => $id,
+            'environment' => $data['environment'],
+            'service_name' => $data['service_name'],
+            'url' => $data['url'] ?? null,
+            'username' => $data['username'] ?? null,
+            'password' => $data['password'] ?? null,
+            'notes' => $data['notes'] ?? null
+        ]);
+
+        \App\Core\Flash::success('Acesso guardado no cofre do projeto!');
+        response()->redirect('/admin/briefings/' . $id . '#tab-vault');
+    }
+
+    public function updateAgreedValue($id)
+    {
+        $data = request()->all();
+        $briefing = ClientBriefing::find($id);
+        
+        if ($briefing && !empty($data['agreed_value'])) {
+            $val = str_replace(['R$', '.', ' '], '', $data['agreed_value']);
+            $val = str_replace(',', '.', $val);
+            
+            $briefing->update(['agreed_value' => $val]);
+            \App\Core\Flash::success('Valor comercial interno salvo!');
+        }
+
+        response()->redirect('/admin/briefings/' . $id . '#tab-financial');
     }
 }

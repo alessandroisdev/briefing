@@ -13,12 +13,18 @@ class EmailQueueService
     public static function enqueue(string $recipientEmail, string $recipientName, string $subject, string $body, array $attachments = []): bool
     {
         try {
-            // First, persist the intent in DB
+            // Apply Master Template
+            $finalBody = \App\Core\View::render('emails.master', [
+                'subject' => $subject,
+                'content' => $body
+            ]);
+
+            // Persist the intent in DB
             $job = EmailJob::create([
                 'recipient_email' => $recipientEmail,
                 'recipient_name'  => $recipientName,
                 'subject'         => $subject,
-                'body'            => $body,
+                'body'            => $finalBody,
                 'status'          => \App\Enums\EmailJobStatus::Pending,
                 'attempts'        => 0,
                 'attachments'     => !empty($attachments) ? json_encode($attachments) : null
@@ -33,5 +39,13 @@ class EmailQueueService
             error_log("Failed to enqueue email: " . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Alias for enqueue
+     */
+    public static function push(string $recipientEmail, string $recipientName, string $subject, string $body, array $attachments = []): bool
+    {
+        return self::enqueue($recipientEmail, $recipientName, $subject, $body, $attachments);
     }
 }

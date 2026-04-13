@@ -77,4 +77,71 @@ class BriefingController
 
         response()->redirect('/cliente/briefings/' . $id);
     }
+
+    public function storeMessage($id)
+    {
+        if (!session()->has('client_id')) return response()->redirect('/cliente/login');
+        
+        $briefing = ClientBriefing::with('template')->find($id);
+        if (!$briefing || $briefing->client->user_id !== session()->get('client_id')) return response()->redirect('/cliente/dashboard');
+
+        $data = request()->all();
+        
+        \App\Models\BriefingMessage::create([
+            'briefing_id' => $id,
+            'sender_id' => session()->get('client_id'),
+            'message' => $data['message'],
+            'is_internal' => false
+        ]);
+
+        \App\Services\NotificationService::sendToAdmins(
+            "Nova Mensagem no Projeto",
+            "O cliente deixou uma nova mensagem no projeto '{$briefing->title}'.",
+            \App\Enums\AlertType::Info,
+            "/admin/briefings/{$briefing->id}#tab-messages"
+        );
+
+        $adminUsers = \App\Models\User::where('role', \App\Enums\UserRole::Admin->value)->get();
+        foreach($adminUsers as $admin) {
+            \App\Services\EmailQueueService::push(
+                $admin->email,
+                $admin->name,
+                "Nova Mensagem - Projeto #{$briefing->id}",
+                "<h4>Olá {$admin->name},</h4><p>Há uma nova mensagem do cliente no workspace do projeto <b>{$briefing->title}</b>.</p><div style='text-align: center; margin-top: 20px;'><a href='" . env('APP_URL') . "/admin/briefings/{$briefing->id}' class='button'>Acessar a War Room</a></div>"
+            );
+        }
+
+        \App\Core\Flash::success('Mensagem enviada com sucesso!');
+        response()->redirect('/cliente/briefings/' . $id . '#tab-messages');
+    }
+
+    public function storeCredential($id)
+    {
+        if (!session()->has('client_id')) return response()->redirect('/cliente/login');
+        
+        $briefing = ClientBriefing::with('template')->find($id);
+        if (!$briefing || $briefing->client->user_id !== session()->get('client_id')) return response()->redirect('/cliente/dashboard');
+
+        $data = request()->all();
+
+        \App\Models\ProjectCredential::create([
+            'briefing_id' => $id,
+            'environment' => $data['environment'],
+            'service_name' => $data['service_name'],
+            'url' => $data['url'] ?? null,
+            'username' => $data['username'] ?? null,
+            'password' => $data['password'] ?? null,
+            'notes' => $data['notes'] ?? null
+        ]);
+
+        \App\Services\NotificationService::sendToAdmins(
+            "Cofre Atualizado",
+            "Novos dados de credencial foram guardados no projeto '{$briefing->title}'.",
+            \App\Enums\AlertType::Warning,
+            "/admin/briefings/{$briefing->id}#tab-vault"
+        );
+
+        \App\Core\Flash::success('Acesso guardado no cofre do projeto!');
+        response()->redirect('/cliente/briefings/' . $id . '#tab-vault');
+    }
 }

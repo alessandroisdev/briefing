@@ -22,6 +22,8 @@ $router->mount('/cliente', function() use ($router) {
     // Client Briefings
     $router->get('/briefings/(\d+)', 'App\Controllers\Client\BriefingController@show');
     $router->post('/briefings/(\d+)/save', 'App\Controllers\Client\BriefingController@save');
+    $router->post('/briefings/(\d+)/message', 'App\Controllers\Client\BriefingController@storeMessage');
+    $router->post('/briefings/(\d+)/credential', 'App\Controllers\Client\BriefingController@storeCredential');
 
     // Client Tickets (Support)
     $router->get('/suporte', 'App\Controllers\Client\TicketController@index');
@@ -64,6 +66,9 @@ $router->mount('/admin', function() use ($router) {
     $router->post('/briefings/store', 'App\Controllers\Admin\ClientBriefingController@store');
     $router->get('/briefings/(\d+)', 'App\Controllers\Admin\ClientBriefingController@show');
     $router->post('/briefings/(\d+)/status', 'App\Controllers\Admin\ClientBriefingController@updateStatus');
+    $router->post('/briefings/(\d+)/message', 'App\Controllers\Admin\ClientBriefingController@storeMessage');
+    $router->post('/briefings/(\d+)/credential', 'App\Controllers\Admin\ClientBriefingController@storeCredential');
+    $router->post('/briefings/(\d+)/agreed-value', 'App\Controllers\Admin\ClientBriefingController@updateAgreedValue');
 
     // Admin Tickets (Support)
     $router->get('/tickets', 'App\Controllers\Admin\TicketController@index');

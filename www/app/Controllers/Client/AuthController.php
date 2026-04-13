@@ -92,16 +92,19 @@ class AuthController
             ]);
 
             $loginUrl = "http://localhost:8000/cliente/login";
-            $body = "<h2>Acesso ao Painel de Briefings</h2>
-                     <p>Olá {$user->name},</p>
-                     <p>Aqui está o seu Código de Acesso único e temporário:</p>
-                     <p style='padding:15px; background:#f4f4f4; border:1px dashed #ccc; font-size:24px; font-weight:bold; letter-spacing:3px; text-align:center;'>
+            $body = "<h3>Acesso ao Painel de Briefings</h3>
+                     <p>Olá <b>{$user->name}</b>,</p>
+                     <p>Aqui está o seu Código Mágico de Acesso, único e temporário:</p>
+                     <div style='padding:20px; background-color: #f1f5f9; border:1px dashed #cbd5e1; border-radius: 6px; font-size:32px; font-weight:800; letter-spacing:5px; text-align:center; color: #0f172a; margin: 20px 0;'>
                         {$token}
-                     </p>
-                     <p>Use este código junto da sua identificação em <a href='{$loginUrl}'>{$loginUrl}</a></p>
-                     <p><em>Este código expira em 24 horas.</em></p>";
+                     </div>
+                     <p>Use este código junto da sua identificação (e-mail ou documento) acessando:</p>
+                     <div class='button-wrap'>
+                         <a href='{$loginUrl}' class='button'>Fazer Login Agora</a>
+                     </div>
+                     <p style='color: #64748b; font-size: 14px;'><em>Este código expira em 24 horas e só pode ser usado uma vez.</em></p>";
 
-            \App\Services\EmailQueueService::enqueue($user->email, $user->name, 'Seu Código de Acesso ao Portal', $body);
+            \App\Services\EmailQueueService::push($user->email, $user->name, 'Seu Código de Acesso ao Portal', $body);
         }
 
         response()->redirect('/cliente/login');
