@@ -51,21 +51,18 @@ class BriefingController
             exit;
         }
 
-        $data = $_POST;
+        $formData = $briefing->form_data ?? []; // Mantém dados antigos para merge
         
-        // Dynamic fields come inside the POST mapped by their label/question
-        // We will just store everything that is not a reserved keyword in form_data JSON
-        $formData = [];
-        foreach ($data as $key => $value) {
-            if (!in_array($key, ['_token', 'status'])) {
-                // To avoid dots being replaced by underscores in PHP POST keys for some reason, 
-                // we assume dynamic inputs passed as they are or base64 encoded keys if complex.
-                // For simplicity, we just use the raw POST keys as questions.
-                $formData[$key] = $value;
+        // Mapeamento à prova de balas: cruza MD5 de volta para o texto original
+        $schema = $briefing->template->form_schema ?? [];
+        if (is_array($schema) && isset($_POST['answers']) && is_array($_POST['answers'])) {
+            foreach ($schema as $field) {
+                $md5Key = md5($field['label']);
+                if (isset($_POST['answers'][$md5Key])) {
+                    $formData[$field['label']] = $_POST['answers'][$md5Key];
+                }
             }
         }
-
-        // If the client submitted files, we would handle $_FILES here
         
         $briefing->update([
             'form_data' => $formData,

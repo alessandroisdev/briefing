@@ -31,17 +31,18 @@
                             <label class="form-label text-white fw-bold">{{ $field['label'] }}</label>
                             
                             @php
-                                // Restore previous answer if exists
-                                $answer = $briefing->form_data[$field['label']] ?? '';
+                                $phpKeyFallback = str_replace([' ', '.'], '_', $field['label']);
+                                $answer = $briefing->form_data[$field['label']] ?? ($briefing->form_data[$phpKeyFallback] ?? '');
+                                $md5Key = md5($field['label']);
                             @endphp
 
                             @if($field['type'] === 'textarea')
-                                <textarea name="{{ $field['label'] }}" class="form-control" rows="4" placeholder="Sua resposta elaborada...">{{ $answer }}</textarea>
+                                <textarea name="answers[{{ $md5Key }}]" class="form-control" rows="4" placeholder="Sua resposta elaborada...">{{ $answer }}</textarea>
                             @elseif($field['type'] === 'file')
                                 <input type="file" name="file_upload_mock" class="form-control text-muted">
                                 <small class="text-muted">Upload de arquivo no MVP está desativado.</small>
                             @else
-                                <input type="text" name="{{ $field['label'] }}" class="form-control" value="{{ $answer }}" placeholder="Sua resposta...">
+                                <input type="text" name="answers[{{ $md5Key }}]" class="form-control" value="{{ $answer }}" placeholder="Sua resposta...">
                             @endif
                         </div>
                     @endforeach
