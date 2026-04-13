@@ -27,6 +27,19 @@ class QueueWorkCommand extends Command
 
         $redis = RedisManager::getClient();
 
+        // [CRASH RECOVERY] Re-enfileirar jobs 'pending' órfãos no banco (que o worker puxou do redis mas crashou antes de finalizar)
+        $output->writeln('<comment>Limpando e sincronizando banco de dados...</comment>');
+        $lostJobs = EmailJob::where('status', 'pending')->get();
+        if(!empty($lostJobs)) {
+            // Remove queue anterior para não duplicar, e recria alinhada ao Banco de origem
+            $redis->del('email_queue');
+            foreach($lostJobs as $ljob) {
+                $redis->rpush('email_queue', $ljob->id);
+            }
+            $count = count($lostJobs);
+            $output->writeln("<info>Recuperados {$count} Jobs pendentes e recolocados na fila veloz.</info>");
+        }
+
         while (true) {
             try {
                 // Blocks until an item is available in the 'email_queue', timeout 10s to prevent PHP socket exhaustion
@@ -57,6 +70,7 @@ class QueueWorkCommand extends Command
 
                 // PHPMailer
                 $mail = new PHPMailer(true);
+                $mail->Timeout = 15; // Set connection timeout explicitly
                 
                 try {
                     if (!empty($host)) {
@@ -70,14 +84,13 @@ class QueueWorkCommand extends Command
                         }
                         $mail->Port       = $port;
                     } else {
-                        // Se as configurações estiverem vazias, simular envio para ambiente local/desenvolvimento
-                        $output->writeln("<comment>No SMTP host configured. Simulating mail send...</comment>");
-                        // Optionally route to mailpit/mailtrap if env is defined but no DB settings
                         if (!empty($_ENV['MAIL_HOST'])) {
                             $mail->isSMTP();
                             $mail->Host = $_ENV['MAIL_HOST'];
                             $mail->Port = $_ENV['MAIL_PORT'] ?? 1025;
                             $mail->SMTPAuth = false;
+                        } else {
+                            throw new Exception("Configuração Ausente: Nenhum Servidor SMTP configurado no banco de dados e nem no .env");
                         }
                     }
 
