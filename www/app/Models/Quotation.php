@@ -15,7 +15,8 @@ class Quotation extends Model
         'total_amount',
         'status',
         'valid_until',
-        'pdf_url'
+        'pdf_url',
+        'client_notes'
     ];
 
     protected $casts = [

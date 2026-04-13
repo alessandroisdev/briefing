@@ -106,7 +106,7 @@
                                 <select class="form-select form-select-sm bg-dark text-white border-secondary" onchange="if(this.value) document.getElementById('messageBox').value = this.value;">
                                     <option value="">-- Usar um Canned Response (Modelo Rápido) --</option>
                                     @foreach($messageTemplates as $mt)
-                                        <option value="{{ htmlspecialchars($mt->body) }}">{{ $mt->title }}</option>
+                                        <option value="{{ htmlspecialchars($mt->content) }}">{{ $mt->title }}</option>
                                     @endforeach
                                 </select>
                             </div>
@@ -215,6 +215,52 @@
                         </div>
                         <button type="submit" class="btn btn-success px-4">Salvar</button>
                     </form>
+
+                    <hr class="border-secondary my-5">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="text-white m-0">Propostas e Faturas do Projeto</h5>
+                        <a href="/admin/quotations/create?briefing_id={{ $briefing->id }}&client_id={{ $briefing->client_id }}" class="btn btn-sm btn-outline-info">
+                            <i class="bi bi-file-earmark-plus"></i> Nova Cotação Formal
+                        </a>
+                    </div>
+                    
+                    @if(count($briefing->quotations) > 0)
+                        <div class="table-responsive">
+                            <table class="table table-dark table-hover mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>Ref</th>
+                                        <th>Status</th>
+                                        <th>Total</th>
+                                        <th>Data</th>
+                                        <th>Ações</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach($briefing->quotations as $q)
+                                        <tr>
+                                            <td class="text-white">#{{ str_pad($q->id, 4, '0', STR_PAD_LEFT) }} - {{ $q->title }}</td>
+                                            <td>
+                                                @if($q->status === 'draft') <span class="badge bg-secondary">Rascunho</span>
+                                                @elseif($q->status === 'sent') <span class="badge bg-info text-dark">Enviado</span>
+                                                @elseif($q->status === 'accepted') <span class="badge bg-success">Aprovado</span>
+                                                @else <span class="badge bg-danger">{{ $q->status }}</span> @endif
+                                            </td>
+                                            <td class="text-gold fw-bold">R$ {{ number_format($q->total_amount, 2, ',', '.') }}</td>
+                                            <td class="text-muted small">{{ $q->created_at->format('d/m/Y') }}</td>
+                                            <td>
+                                                <a href="/admin/quotations/{{ $q->id }}" class="btn btn-sm btn-outline-light"><i class="bi bi-eye"></i></a>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @else
+                        <p class="text-muted small">Crie orçamentos detalhados com escopos pré-definidos para exportar em PDF para o cliente.</p>
+                    @endif
+
                 </div>
             </div>
 

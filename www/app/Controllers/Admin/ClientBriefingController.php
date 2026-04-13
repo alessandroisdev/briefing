@@ -49,7 +49,7 @@ class ClientBriefingController
 
     public function show($id)
     {
-        $briefing = ClientBriefing::with(['client.user', 'template', 'messages.sender', 'credentials'])->find($id);
+        $briefing = ClientBriefing::with(['client.user', 'template', 'messages.sender', 'credentials', 'quotations'])->find($id);
 
         if (!$briefing) {
             \App\Core\Flash::error('Projeto não encontrado!');

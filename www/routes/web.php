@@ -25,6 +25,12 @@ $router->mount('/cliente', function() use ($router) {
     $router->post('/briefings/(\d+)/message', 'App\Controllers\Client\BriefingController@storeMessage');
     $router->post('/briefings/(\d+)/credential', 'App\Controllers\Client\BriefingController@storeCredential');
 
+    // Client Quotations
+    $router->get('/quotations/(\d+)', 'App\Controllers\Client\QuotationController@show');
+    $router->get('/quotations/(\d+)/pdf', 'App\Controllers\Client\QuotationController@generatePdf');
+    $router->post('/quotations/(\d+)/approve', 'App\Controllers\Client\QuotationController@approve');
+    $router->post('/quotations/(\d+)/reject', 'App\Controllers\Client\QuotationController@reject');
+
     // Client Tickets (Support)
     $router->get('/suporte', 'App\Controllers\Client\TicketController@index');
     $router->get('/suporte/novo', 'App\Controllers\Client\TicketController@create');
@@ -81,6 +87,7 @@ $router->mount('/admin', function() use ($router) {
     $router->get('/quotations/create', 'App\Controllers\Admin\QuotationController@create');
     $router->post('/quotations/store', 'App\Controllers\Admin\QuotationController@store');
     $router->get('/quotations/(\d+)', 'App\Controllers\Admin\QuotationController@show');
+    $router->post('/quotations/(\d+)/send', 'App\Controllers\Admin\QuotationController@sendToClient');
     $router->get('/quotations/(\d+)/pdf', 'App\Controllers\Admin\QuotationController@generatePdf');
 
     // Admin Tickets (Support)

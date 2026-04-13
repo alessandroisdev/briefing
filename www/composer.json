@@ -13,7 +13,8 @@
         "eftec/bladeone": "^4.9",
         "phpmailer/phpmailer": "^7.0",
         "symfony/console": "^8.0",
-        "illuminate/http": "^11.0"
+        "illuminate/http": "^11.0",
+        "dompdf/dompdf": "^3.1"
     },
     "autoload": {
         "psr-4": {

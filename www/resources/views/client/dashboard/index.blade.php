@@ -96,6 +96,56 @@
         </div>
     </div>
 </div>
+
+<div class="row mt-5">
+    <div class="col-12">
+        <h4 class="text-white mb-4"><i class="bi bi-receipt text-gold me-2"></i> Orçamentos e Faturas</h4>
+        <div class="card bg-dark border-secondary shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-dark table-hover mb-0">
+                    <thead style="background-color: #0f172a;">
+                        <tr>
+                            <th>Nº Orçamento</th>
+                            <th>Status</th>
+                            <th>Valor Total</th>
+                            <th>Validade</th>
+                            <th class="text-end">Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @forelse($quotations as $q)
+                        <tr>
+                            <td class="text-white">
+                                <strong class="fs-6">#{{ str_pad($q->id, 5, '0', STR_PAD_LEFT) }}</strong><br>
+                                <small class="text-muted">{{ $q->title }}</small>
+                            </td>
+                            <td>
+                                @if($q->status === 'sent') <span class="badge bg-info text-dark mt-2">Aguardando Avaliação</span>
+                                @elseif($q->status === 'accepted') <span class="badge bg-success mt-2">Aprovado</span>
+                                @else <span class="badge bg-secondary mt-2">{{ $q->status }}</span> @endif
+                            </td>
+                            <td class="text-gold fw-bold align-middle">R$ {{ number_format($q->total_amount, 2, ',', '.') }}</td>
+                            <td class="text-muted small align-middle">{{ date('d/m/Y', strtotime($q->valid_until)) }}</td>
+                            <td class="text-end align-middle">
+                                <a href="/cliente/quotations/{{ $q->id }}" class="btn btn-sm btn-outline-light">
+                                    <i class="bi bi-file-earmark-pdf"></i> Visualizar
+                                </a>
+                            </td>
+                        </tr>
+                        @empty
+                        <tr>
+                            <td colspan="5" class="text-center py-5 text-secondary">
+                                <i class="bi bi-inbox fs-1"></i><br>
+                                Você ainda não possui orçamentos pendentes.
+                            </td>
+                        </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')

@@ -24,8 +24,11 @@
             <a href="/admin/clients" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/clients') === 0 ? 'active' : '' }}">
                 <i class="bi bi-people-fill"></i> Clientes
             </a>
-            <a href="/admin/templates" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/templates') === 0 ? 'active' : '' }}">
+            <a href="/admin/templates" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/templates') === 0 && strpos($_SERVER['REQUEST_URI'], '/admin/templates/messages') === false ? 'active' : '' }}">
                 <i class="bi bi-journal-check"></i> Modelos de Briefing
+            </a>
+            <a href="/admin/templates/messages" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/templates/messages') === 0 ? 'active' : '' }}">
+                <i class="bi bi-chat-square-quote"></i> Respostas Rápidas
             </a>
             <a href="/admin/briefings" class="sidebar-link {{ strpos($_SERVER['REQUEST_URI'], '/admin/briefings') === 0 ? 'active' : '' }}">
                 <i class="bi bi-ui-checks"></i> Projetos em Andamento

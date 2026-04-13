@@ -17,14 +17,22 @@ class DashboardController
         
         $briefings = [];
         if ($client) {
-            $briefings = \App\Models\ClientBriefing::with('template')
-                            ->where('client_id', $client->id)
-                            ->orderBy('updated_at', 'DESC')
-                            ->get();
+            $briefings = \App\Models\ClientBriefing::with(['template', 'messages' => function($q) {
+                $q->orderBy('created_at', 'desc');
+            }])->where('client_id', $client->id)->orderBy('created_at', 'desc')->get();
+
+            $quotations = \App\Models\Quotation::where('client_id', $client->id)
+                ->where('status', '!=', 'draft')
+                ->orderBy('created_at', 'desc')
+                ->get();
+        } else {
+            $quotations = [];
         }
 
         response(View::render('client.dashboard.index', [
-            'briefings' => $briefings
+            'client' => $client,
+            'briefings' => $briefings,
+            'quotations' => $quotations
         ]))->send();
     }
 }

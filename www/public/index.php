@@ -2,6 +2,9 @@
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
+// Impedir que avisos de Deprecated de bibliotecas de terceiros (ex: brick/math) quebrem os headers do router
+error_reporting(E_ALL & ~E_DEPRECATED);
+
 // Require Helpers directly to ensure they load extremely early before Router
 require_once __DIR__ . '/../app/Core/Helpers.php';
 

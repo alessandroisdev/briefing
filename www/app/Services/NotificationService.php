@@ -55,7 +55,7 @@ class NotificationService
                 $emoji = match ($type) {
                     \App\Enums\AlertType::Success => '✅',
                     \App\Enums\AlertType::Warning => '⚠️',
-                    \App\Enums\AlertType::Error => '🚨',
+                    \App\Enums\AlertType::Danger => '🚨',
                     default => '🔔'
                 };
 
@@ -92,5 +92,38 @@ class NotificationService
                 }
             }
         }
+    }
+
+    /**
+     * Envia uma notificação para um cliente específico.
+     * 
+     * @param int $userId
+     * @param string $title
+     * @param string $message
+     * @param \App\Enums\AlertType $type
+     * @param string|null $actionUrl
+     * @return void
+     */
+    public static function sendToClient($userId, $title, $message, \App\Enums\AlertType $type = \App\Enums\AlertType::Info, $actionUrl = null)
+    {
+        $notification = Notification::create([
+            'user_id' => $userId,
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+            'action_url' => $actionUrl,
+            'read_at' => null
+        ]);
+
+        // Dispara sinal SSE em Tempo Real para o cliente
+        RedisManager::publish('notifications_channel', [
+            'event' => 'new_notification',
+            'notification_id' => $notification->id,
+            'user_id' => $userId,
+            'title' => $title,
+            'message' => $message,
+            'type' => $type->value,
+            'action_url' => $actionUrl
+        ]);
     }
 }
