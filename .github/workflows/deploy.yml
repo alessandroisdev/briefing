@@ -1,0 +1,52 @@
+name: Briefing (Produção)
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Clonar Repositório
+        uses: actions/checkout@v4
+
+      - name: 🐘 Configurar PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, json, pdo, pdo_mysql, dom, xml
+          coverage: none
+
+      - name: 🚀 Instalar Dependências (Composer)
+        run: |
+          cd www
+          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      - name: 🧹 Limpeza de Arquivos Desnecessários
+        run: |
+          # Remover arquivos que não precisam subir pro servidor
+          rm -rf .git
+          rm -rf .github
+          rm -rf .dev
+          rm -rf www/tests
+          rm -rf www/node_modules
+          rm -rf www/storage
+
+      - name: 📂 Realizar FTP Upload
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_HOSTGATOR_SERVER }}
+          username: ${{ secrets.FTP_HOSTGATOR_USERNAME }}
+          password: ${{ secrets.FTP_HOSTGATOR_PASSWORD }}
+          local-dir: ./www/
+          server-dir: ${{ secrets.FTP_HOSTGATOR_TARGET_DIR }} # Ex: /public_html/ ou /aplicativo/
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/node_modules/**
+            **/.env
+            **/storage/**
+            **/tests/**
+            **/.dev/**
