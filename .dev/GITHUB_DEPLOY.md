@@ -1,68 +1,46 @@
-# Automatação de Deploy: GitHub Actions ➔ HostGator 🚀
+# Automatação de Deploy: GitHub Actions ➔ HostGator 🚀 (Via SSH Profissional)
 
-Este repositório está configurado com um fluxo contínuo (CI/CD) de código. A automação processará os pacotes PHP da aplicação e enviará exatamente e apenas o conteúdo da pasta `www/` compilada diretamente para a sua hospedagem na Locaweb, HostGator ou cPanel **quando você criar uma nova Release**.
+O fluxo de implantação foi totalmente modernizado! Esqueça o protocolo FTP ultrapassado. Agora, utilizamos conexões Criptografadas SSH e SCP diretamente no terminal da sua hospedagem.
 
-Isso resolve o problema de ter que enviar milhares de arquivos da pasta `vendor` via FileZilla (o GitHub fará o download lá e mandará já comprimido pelo protocolo).
+**Vantagens esmagadoras sobre o método antigo (FTP):**
+- A transferência inicial leva **segundos** em vez de minutos, pois não enviamos as dezenas de milhares de arquivos pesados contidos na pasta `vendor`. Mandamos apenas os textos do Seu Código Oficial (Controller, HTML, CSS).
+- Um robô acessará secretamente o servidor da Hostgator e montará o quebra-cabeça (Composer Install) **diretamente pela memória da máquina deles**. Maior estabilidade e garantia imaculada de que os arquivos do framework batem perfeitamente.
+- O Banco de Dados executa as migrações automáticas pendentes num piscar de olhos logo após o código cair. Sem trabalho manual após Release!
 
 ---
 
 ## 1. Configurando os Segredos (Secrets) no GitHub
 
-Para que o GitHub Actions tenha permissão de acessar sua hospedagem, você precisa cadastrar as **Actions Secrets**.
+Para as Actions funcionarem, seu sistema base (HostGator/cPanel) **deve suportar e estar com o Acesso SSH liberado** nas configurações de segurança do painel.
 
-1. Acesse seu repositório no **GitHub**.
-2. Clique na engrenagem **Settings** (Configurações) ➔ **Secrets and variables** ➔ **Actions**.
-3. Clique no botão verde **New repository secret** e adicione exatamente as seguintes chaves uma por uma:
+No GitHub vá em **Settings (Engrenagem)** ➔ **Secrets and variables** ➔ **Actions**.
+Cadastre estas chaves:
 
 | Nome da Secret | Valor (Exemplo) | Onde conseguir? |
 | :--- | :--- | :--- |
-| `FTP_HOSTGATOR_SERVER` | `ftp.seudominio.com.br` | Endereço FTP ou IP liberado no Painel de Hospedagem (cPanel). |
-| `FTP_HOSTGATOR_USERNAME` | `usuario@seudominio.com.br` | O usuário principal do FTP ou um específico criado no cPanel para esse App. |
-| `FTP_HOSTGATOR_PASSWORD` | `SuaSenhaForte123!` | A senha do FTP correspondente. |
-| `FTP_HOSTGATOR_TARGET_DIR` | `/app_briefing/` ou `/public_html/` | A ***pasta de destino***. Onde o conteúdo de `www/` deve ser guardado. *Lembre-se de colocar as "/" no fim*. |
+| `SSH_HOST` | `br00.hostgator.com.br` | O IP ou domínio do seu acesso cPanel/Servidor. |
+| `SSH_USERNAME` | `usuario_cpanel` | Seu usuário ROOT do cPanel ou do Jail. |
+| `SSH_PASSWORD` | `SuaSenhaForte123!` | *Atenção: Na hostgator, é melhor usar Password pura no começo. Em provedores Premium (AWS/DigitalOcean), se usaria SSH_KEY com a chave RSA.* |
+| `DEPLOY_PATH` | `/home/usuario_cpanel/public_html/` | O **caminho absoluto (Full Path)** da hospedagem. |
+
+> **Detalhe da Porta SSH:** Se a porta SSH do seu Hostgator **não for 22** e sim a clássica **2222**, crie a porta nos segredos ou apenas tire o comentário do campo `port: 2222` diretamente dentro do seu arquivo `.github/workflows/deploy.yml`.
 
 ---
 
-## 2. Como Disparar o Deploy?
+## 2. O Processo Exato de Deploy (O que acontece por trás dos panos?)
 
-O fluxo está amarrado ao evento de `Release (Published)`. Isso garante que o servidor só receba versões estáveis e aprovadas do seu sistema, ignorando commits em andamento.
+Quando você gerar uma **Nova Release (Published)** a partir do menu `Tags / Releases` na branch main:
 
-> **Importante:** A esteira de automação só dispara as modificações relativas daquela Release se ela for criada na branch principal (geralmente `main`).
-
-Para colocar no ar:
-1. Trabalhe normalmente e faça commit/push das alterações para sua branch `main` no GitHub.
-2. Acesse a página inicial do repositório no GitHub.
-3. No lado direito, em **Releases**, clique em **Create a new release** (ou Draft a new release).
-4. Em **Choose a tag**, digite a versão apontando para a `main` (ex: `v1.0.1`) e clique em *Create new tag*.
-5. Dê um título (ex: _Release v1.0.1 - Módulo Financeiro_).
-6. Pressione o botão verde **Publish release**.
-
-Imediatamente após publicar, acesse a aba **Actions** na parte superior. Você verá o robô `Deploy para HostGator (Produção)` executando:
-1. Ele criará um contêiner Linux no GitHub.
-2. Baixará o PHP 8.4 e o Composer.
-3. Executará os builds automáticos instalando as bibliotecas no painel do Github.
-4. Conectará no seu HostGator silenciosamente e transferirá **apenas os arquivos com diferenças**, economizando banda.
+1. **Empacotamento Magro**: O Robô apaga os lixos de teste da sua aplicação. Ignora o `.env` (que já deve existir vivo no servidor HostGator para não explodir em senhas locais vazadas) e recusa também toda a volumosa pasta `vendor`.
+2. **Transferência Relâmpago (SCP)**: Em poucos segundos o pacote base com o código purificado do `BriefingApp` cai na pasta do HostGator designada no `DEPLOY_PATH`.
+3. **Pilar Esterno (O Terminal)**: O Github abre um **SSH In-Browser** fantasma com o servidor:
+   * **Composer Install (`--optimize-autoloader`)**: Ele obriga o PHP da HostGator a baixar todos pacotes nativos mais recentes e mapeá-los nativamente pro disco, eliminando os erros 500 do Blade/Autoload gaguejante.
+   * **Teste de Sanidade (`composer check-platform-reqs`)**: Dispara um alarme caso alguma dependência no Hostgator esteja desatualizada.
+   * **Database Sync Automático**: Roda o seu console customizado `php nortedev db:migrate --env=production`. Tudo que você criar localmente (novas tabelas / migrações do Phinx) magicamente brotará na nuvem HostGator para você!
 
 ---
 
-## 3. O que essa Automação ignora propositalmente?
+## 3. Resolução de Problemas Comuns (Avisos Importantes na Hostgator)
 
-A automação do GitHub usará a regra estrita do campo de *exclude*. Arquivos que **não** serão enviados e injetados na sua hospedagem em nenhuma hipótese:
-- O arquivo de banco primário local `www/.env` (você precisa configurar o .env do Hostgator manualmente pelo Painel da HostGator apenas uma vez, e o Github nunca o subscreverá acidentalmente).
-- Bibliotecas do front-end da sua máquina como a pasta `node_modules`.
-- Código inútil online da pasta de documentações `.dev/` e infraestrutura do repositório `.git/`.
-
----
-
-## 4. Banco de Dados / Migrações Pós-Deploy
-
-O GitHub Actions fará o upload dos arquivos modificados. **Porém, ele não tem acesso seguro direto e cego ao Banco de Dados da Hospedagem** para reescrever tabelas.
-
-Sempre que a sua nova Versão/Release incluir modificações de banco (alteração de tabelas e `.php` de Migrations), logue no Shell SSH da sua HostGator após o deploy e dispare manualmente o comando de evolução arquitetural:
-
-```bash
-cd /pasta_da_sua_aplicacao/
-vendor/bin/phinx migrate -e development
-```
-
-*Sucesso na Jornada!* Mantenha seu ambiente focado e sua ramificação (branch) limpa. Tendo o `deploy.yml` na pasta oficial do Github, não precisará se preocupar com envio via WebFTP.
+1. **Caminho do PHP Específico:** Para quem tem múltiplos PHPs instalados no cPanel (ex: Select PHP Version), as vezes só digitar a palavra `composer` nos Scripts do GitHub Action pode cair num PHP 7 jurássico. Se o Action falhar, edite o seu `deploy.yml` e mude as chamadas para a rota bruta da sua engine HostGator desejada, como `/opt/cpanel/ea-php84/root/usr/bin/php nortedev ...`
+2. **O .env**: Não canso de reforçar para equipes de DevOps iniciantes: A automação NUNCA tocará no `.env` global. A responsabilidade de ir no cPanel e preencher a senha do Banco e do Redis no arquivo `.env` uma única vez é primária!

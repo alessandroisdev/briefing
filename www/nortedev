@@ -17,5 +17,8 @@ $application = new Application('NorteDev Console', '1.0.0');
 
 // Register Commands Manually for now (can be dynamic later if needed)
 $application->addCommand(new \App\Console\Commands\QueueWorkCommand());
+$application->addCommand(new \App\Console\Commands\DbMigrateCommand());
+$application->addCommand(new \App\Console\Commands\DbSeedCommand());
+$application->addCommand(new \App\Console\Commands\DbRefreshCommand());
 
 $application->run();
